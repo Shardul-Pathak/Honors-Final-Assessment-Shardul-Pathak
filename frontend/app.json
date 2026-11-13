@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Student Management System",
+    "slug": "student-management-system",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "studentmgmt",
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
