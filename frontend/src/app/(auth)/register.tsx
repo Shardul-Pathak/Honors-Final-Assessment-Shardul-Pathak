@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { registerThunk, clearAuthError } from '../../store/slices/authSlice';
@@ -64,146 +65,162 @@ export default function RegisterScreen() {
           contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.topBar}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-              <Text style={[styles.backText, { color: theme.textSecondary }]}>← Back</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={toggleTheme}
-              style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
-            >
-              <Text style={styles.themeIcon}>{isDark ? '☀️' : '🌙'}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>Create Account</Text>
-            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-              Join the academic leaderboard platform
-            </Text>
-          </View>
-
-          {error && (
-            <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
-              <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
-            </View>
-          )}
-
-          <View style={[styles.formCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Account Role</Text>
-            <View style={styles.roleSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.roleOption,
-                  role === 'STUDENT'
-                    ? { backgroundColor: theme.primary, borderColor: theme.primary }
-                    : { backgroundColor: theme.surface, borderColor: theme.border },
-                ]}
-                onPress={() => setRole('STUDENT')}
-              >
-                <Text
-                  style={[
-                    styles.roleText,
-                    { color: role === 'STUDENT' ? '#FFFFFF' : theme.text },
-                  ]}
-                >
-                  👨‍🎓 Student
-                </Text>
+          <View style={styles.cardWrapper}>
+            <View style={styles.topBar}>
+              <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                <Feather name="arrow-left" size={18} color={theme.text} style={{ marginRight: 6 }} />
+                <Text style={[styles.backText, { color: theme.text }]}>Back</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
-                style={[
-                  styles.roleOption,
-                  role === 'TEACHER'
-                    ? { backgroundColor: theme.primary, borderColor: theme.primary }
-                    : { backgroundColor: theme.surface, borderColor: theme.border },
-                ]}
-                onPress={() => setRole('TEACHER')}
+                onPress={toggleTheme}
+                style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
+                accessibilityLabel="Toggle Theme"
               >
-                <Text
-                  style={[
-                    styles.roleText,
-                    { color: role === 'TEACHER' ? '#FFFFFF' : theme.text },
-                  ]}
-                >
-                  👩‍🏫 Faculty / Teacher
-                </Text>
+                <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Full Name</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="e.g. Maya Lin"
-              placeholderTextColor={theme.textMuted}
-            />
+            <View style={styles.header}>
+              <Text style={[styles.title, { color: theme.text }]}>Create Account</Text>
+              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                Register for the academic platform
+              </Text>
+            </View>
 
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Email Address</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="e.g. maya@rbu.edu"
-              placeholderTextColor={theme.textMuted}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Password</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="At least 6 characters"
-              placeholderTextColor={theme.textMuted}
-              secureTextEntry
-            />
-
-            {role === 'STUDENT' && (
-              <>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>Roll Number</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-                  value={rollNumber}
-                  onChangeText={setRollNumber}
-                  placeholder="e.g. RBU-2026-050"
-                  placeholderTextColor={theme.textMuted}
-                />
-
-                <Text style={[styles.label, { color: theme.textSecondary }]}>Department / Major</Text>
-                <TextInput
-                  style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-                  value={gradeLevel}
-                  onChangeText={setGradeLevel}
-                  placeholder="e.g. Computer Science"
-                  placeholderTextColor={theme.textMuted}
-                />
-              </>
+            {error && (
+              <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
+                <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
+              </View>
             )}
 
-            <TouchableOpacity
-              style={[styles.submitBtn, { backgroundColor: theme.primary }]}
-              onPress={handleRegister}
-              disabled={isLoading}
-              activeOpacity={0.8}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <Text style={styles.submitBtnText}>Create Account</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+            <View style={[styles.formCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Account Role</Text>
+              <View style={styles.roleSelector}>
+                <TouchableOpacity
+                  style={[
+                    styles.roleOption,
+                    role === 'STUDENT'
+                      ? { backgroundColor: theme.primary, borderColor: theme.primary }
+                      : { backgroundColor: theme.surface, borderColor: theme.border },
+                  ]}
+                  onPress={() => setRole('STUDENT')}
+                >
+                  <Ionicons
+                    name="school-outline"
+                    size={16}
+                    color={role === 'STUDENT' ? '#FFFFFF' : theme.text}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={[
+                      styles.roleText,
+                      { color: role === 'STUDENT' ? '#FFFFFF' : theme.text },
+                    ]}
+                  >
+                    Student
+                  </Text>
+                </TouchableOpacity>
 
-          <View style={styles.footerRow}>
-            <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-              Already registered?{' '}
-            </Text>
-            <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-              <Text style={[styles.signinLink, { color: theme.primary }]}>Sign In</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.roleOption,
+                    role === 'TEACHER'
+                      ? { backgroundColor: theme.primary, borderColor: theme.primary }
+                      : { backgroundColor: theme.surface, borderColor: theme.border },
+                  ]}
+                  onPress={() => setRole('TEACHER')}
+                >
+                  <Ionicons
+                    name="briefcase-outline"
+                    size={16}
+                    color={role === 'TEACHER' ? '#FFFFFF' : theme.text}
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={[
+                      styles.roleText,
+                      { color: role === 'TEACHER' ? '#FFFFFF' : theme.text },
+                    ]}
+                  >
+                    Faculty
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Full Name</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
+                value={fullName}
+                onChangeText={setFullName}
+                placeholder="Enter full name"
+                placeholderTextColor={theme.textMuted}
+              />
+
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Email Address</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter email address"
+                placeholderTextColor={theme.textMuted}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Password</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="At least 6 characters"
+                placeholderTextColor={theme.textMuted}
+                secureTextEntry
+              />
+
+              {role === 'STUDENT' && (
+                <>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Roll Number</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
+                    value={rollNumber}
+                    onChangeText={setRollNumber}
+                    placeholder="e.g. RBU-2026-050"
+                    placeholderTextColor={theme.textMuted}
+                  />
+
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Department / Major</Text>
+                  <TextInput
+                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
+                    value={gradeLevel}
+                    onChangeText={setGradeLevel}
+                    placeholder="e.g. Computer Science"
+                    placeholderTextColor={theme.textMuted}
+                  />
+                </>
+              )}
+
+              <TouchableOpacity
+                style={[styles.submitBtn, { backgroundColor: theme.primary }]}
+                onPress={handleRegister}
+                disabled={isLoading}
+                activeOpacity={0.8}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text style={styles.submitBtnText}>Create Account</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.footerRow}>
+              <Text style={[styles.footerText, { color: theme.textSecondary }]}>
+                Already registered?{' '}
+              </Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+                <Text style={[styles.signinLink, { color: theme.primary }]}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -216,16 +233,23 @@ const styles = StyleSheet.create({
     padding: 24,
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardWrapper: {
+    width: '100%',
+    maxWidth: 460,
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   backText: {
     fontSize: 14,
@@ -238,9 +262,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  themeIcon: {
-    fontSize: 16,
   },
   header: {
     marginBottom: 20,
@@ -266,7 +287,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formCard: {
-    padding: 20,
+    padding: 22,
     borderRadius: 18,
     borderWidth: 1,
   },
@@ -282,6 +303,7 @@ const styles = StyleSheet.create({
   },
   roleOption: {
     flex: 1,
+    flexDirection: 'row',
     paddingVertical: 10,
     borderRadius: 10,
     borderWidth: 1,

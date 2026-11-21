@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
   fetchLeaderboardThunk,
@@ -79,18 +80,21 @@ export default function TeacherLeaderboardScreen() {
         {/* Metric Cards Banner */}
         <View style={styles.metricsRow}>
           <View style={[styles.metricCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Feather name="users" size={18} color={theme.primary} style={styles.metricIcon} />
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Enrolled</Text>
             <Text style={[styles.metricValue, { color: theme.primary }]}>{totalElements}</Text>
             <Text style={[styles.metricSub, { color: theme.textMuted }]}>Students</Text>
           </View>
 
           <View style={[styles.metricCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Ionicons name="trophy-outline" size={18} color={theme.gold} style={styles.metricIcon} />
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Top Score</Text>
             <Text style={[styles.metricValue, { color: theme.gold }]}>{highestPoints}</Text>
             <Text style={[styles.metricSub, { color: theme.textMuted }]}>Leader pts</Text>
           </View>
 
           <View style={[styles.metricCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Feather name="trending-up" size={18} color={theme.accent} style={styles.metricIcon} />
             <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Class Avg</Text>
             <Text style={[styles.metricValue, { color: theme.accent }]}>{avgPoints}</Text>
             <Text style={[styles.metricSub, { color: theme.textMuted }]}>Points / st</Text>
@@ -100,9 +104,12 @@ export default function TeacherLeaderboardScreen() {
         {/* Success feedback alert */}
         {awardSuccessMessage && (
           <View style={[styles.alertBox, { backgroundColor: theme.accentLight, borderColor: theme.accent }]}>
-            <Text style={[styles.alertText, { color: theme.accent }]}>✓ {awardSuccessMessage}</Text>
-            <TouchableOpacity onPress={() => dispatch(clearAwardMessage())}>
-              <Text style={[styles.alertDismiss, { color: theme.accent }]}>✕</Text>
+            <View style={styles.alertContent}>
+              <Feather name="check-circle" size={16} color={theme.accent} style={{ marginRight: 8 }} />
+              <Text style={[styles.alertText, { color: theme.accent }]}>{awardSuccessMessage}</Text>
+            </View>
+            <TouchableOpacity onPress={() => dispatch(clearAwardMessage())} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Feather name="x" size={16} color={theme.accent} />
             </TouchableOpacity>
           </View>
         )}
@@ -164,6 +171,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
+  metricIcon: {
+    marginBottom: 4,
+  },
   metricLabel: {
     fontSize: 11,
     fontWeight: '600',
@@ -187,14 +197,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 14,
   },
+  alertContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
   alertText: {
     fontSize: 13,
     fontWeight: '600',
-  },
-  alertDismiss: {
-    fontSize: 14,
-    fontWeight: '700',
-    padding: 4,
+    flex: 1,
   },
   listHeader: {
     flexDirection: 'row',

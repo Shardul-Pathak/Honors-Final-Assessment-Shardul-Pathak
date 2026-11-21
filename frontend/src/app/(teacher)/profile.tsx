@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { router } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { logoutThunk } from '../../store/slices/authSlice';
 import { useAppTheme } from '../../context/ThemeContext';
 import { LayoutContainer } from '../../components/LayoutContainer';
 import { Header } from '../../components/Header';
 
-// Faculty profile screen displaying permissions, role details, and UI theme controls
+// Faculty profile screen displaying account details, preferences, and authentication controls
 export default function TeacherProfileScreen() {
   const { theme, isDark, toggleTheme } = useAppTheme();
   const dispatch = useAppDispatch();
@@ -30,7 +31,7 @@ export default function TeacherProfileScreen() {
 
   return (
     <LayoutContainer>
-      <Header title="Faculty Profile" subtitle="Administrative Settings" />
+      <Header title="Faculty Profile" subtitle="Account Settings" />
 
       <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.profileCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -42,41 +43,31 @@ export default function TeacherProfileScreen() {
           <Text style={[styles.userName, { color: theme.text }]}>{user?.fullName}</Text>
           <Text style={[styles.userEmail, { color: theme.textSecondary }]}>{user?.email}</Text>
           <View style={[styles.roleBadge, { backgroundColor: theme.primaryLight }]}>
-            <Text style={[styles.roleBadgeText, { color: theme.primary }]}>Faculty / Teacher</Text>
+            <Text style={[styles.roleBadgeText, { color: theme.primary }]}>Faculty Member</Text>
           </View>
         </View>
 
         <View style={[styles.detailsCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Faculty Role Permissions</Text>
+          <Text style={[styles.cardTitle, { color: theme.text }]}>Account Information</Text>
 
-          <View style={styles.permissionRow}>
-            <Text style={styles.permIcon}>✓</Text>
-            <View style={styles.permTextWrapper}>
-              <Text style={[styles.permTitle, { color: theme.text }]}>Point Allocation</Text>
-              <Text style={[styles.permSub, { color: theme.textSecondary }]}>
-                Authorized to award and deduct classroom points
-              </Text>
-            </View>
+          <View style={styles.detailRow}>
+            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Full Name</Text>
+            <Text style={[styles.detailValue, { color: theme.text }]}>{user?.fullName || '-'}</Text>
           </View>
 
-          <View style={styles.permissionRow}>
-            <Text style={styles.permIcon}>✓</Text>
-            <View style={styles.permTextWrapper}>
-              <Text style={[styles.permTitle, { color: theme.text }]}>Leaderboard Management</Text>
-              <Text style={[styles.permSub, { color: theme.textSecondary }]}>
-                Full visibility across paginated rank standings
-              </Text>
-            </View>
+          <View style={styles.detailRow}>
+            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Email Address</Text>
+            <Text style={[styles.detailValue, { color: theme.text }]}>{user?.email || '-'}</Text>
           </View>
 
-          <View style={styles.permissionRow}>
-            <Text style={styles.permIcon}>✓</Text>
-            <View style={styles.permTextWrapper}>
-              <Text style={[styles.permTitle, { color: theme.text }]}>Transaction Logging</Text>
-              <Text style={[styles.permSub, { color: theme.textSecondary }]}>
-                Audit trail recorded in PostgreSQL database
-              </Text>
-            </View>
+          <View style={styles.detailRow}>
+            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Assigned Role</Text>
+            <Text style={[styles.detailValue, { color: theme.text }]}>TEACHER</Text>
+          </View>
+
+          <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
+            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Account Status</Text>
+            <Text style={[styles.detailValue, { color: theme.accent }]}>Active</Text>
           </View>
         </View>
 
@@ -103,7 +94,8 @@ export default function TeacherProfileScreen() {
           style={[styles.logoutBtn, { backgroundColor: theme.error + '15', borderColor: theme.error }]}
           onPress={handleLogout}
         >
-          <Text style={[styles.logoutText, { color: theme.error }]}>🚪 Sign Out</Text>
+          <Feather name="log-out" size={18} color={theme.error} style={{ marginRight: 8 }} />
+          <Text style={[styles.logoutText, { color: theme.error }]}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </LayoutContainer>
@@ -163,29 +155,19 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
-  permissionRow: {
+  detailRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E2E8F0',
   },
-  permIcon: {
-    fontSize: 16,
-    color: '#10B981',
-    fontWeight: '800',
-  },
-  permTextWrapper: {
-    flex: 1,
-  },
-  permTitle: {
+  detailLabel: {
     fontSize: 13,
-    fontWeight: '700',
   },
-  permSub: {
-    fontSize: 11,
-    marginTop: 2,
+  detailValue: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   settingsCard: {
     padding: 18,
@@ -211,6 +193,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 14,
     borderWidth: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },

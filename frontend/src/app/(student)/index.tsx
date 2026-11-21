@@ -3,11 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   ActivityIndicator,
   RefreshControl,
   ScrollView,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchLeaderboardThunk, fetchMyRankThunk } from '../../store/slices/leaderboardSlice';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -49,7 +49,7 @@ export default function StudentLeaderboardScreen() {
 
   return (
     <LayoutContainer>
-      <Header title="Leaderboard" subtitle="Live Academic Standings" />
+      <Header title="Student Leaderboard" subtitle="Academic Standings" />
 
       <ScrollView
         contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
@@ -71,10 +71,11 @@ export default function StudentLeaderboardScreen() {
             <View style={styles.heroRight}>
               <View style={styles.heroRankBadge}>
                 <Text style={styles.heroRankNumber}>#{myRank.rank}</Text>
-                <Text style={styles.heroRankLabel}>Rank</Text>
+                <Text style={styles.heroRankLabel}>Current Rank</Text>
               </View>
               <View style={styles.heroPointsPill}>
-                <Text style={styles.heroPointsText}>⭐ {myRank.totalPoints} pts</Text>
+                <Ionicons name="star" size={13} color="#FFFFFF" style={{ marginRight: 4 }} />
+                <Text style={styles.heroPointsText}>{myRank.totalPoints} pts</Text>
               </View>
             </View>
           </View>
@@ -88,8 +89,8 @@ export default function StudentLeaderboardScreen() {
             <View style={styles.podiumRow}>
               {/* 2nd Place */}
               <View style={[styles.podiumCol, styles.podiumCol2]}>
-                <View style={[styles.podiumAvatar, { backgroundColor: '#F1F5F9' }]}>
-                  <Text style={styles.podiumMedal}>🥈</Text>
+                <View style={[styles.podiumAvatar, { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }]}>
+                  <Ionicons name="medal-outline" size={22} color="#64748B" />
                 </View>
                 <Text style={[styles.podiumName, { color: theme.text }]} numberOfLines={1}>
                   {topThree[1].fullName}
@@ -104,13 +105,13 @@ export default function StudentLeaderboardScreen() {
 
               {/* 1st Place */}
               <View style={[styles.podiumCol, styles.podiumCol1]}>
-                <View style={[styles.podiumAvatar, { backgroundColor: '#FEF3C7' }]}>
-                  <Text style={styles.podiumMedal}>🥇</Text>
+                <View style={[styles.podiumAvatar, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}>
+                  <Ionicons name="trophy" size={24} color="#D97706" />
                 </View>
                 <Text style={[styles.podiumName, { color: theme.text }]} numberOfLines={1}>
                   {topThree[0].fullName}
                 </Text>
-                <Text style={[styles.podiumScore, { color: '#D97706', fontWeight: '700' }]}>
+                <Text style={[styles.podiumScore, { color: '#B45309', fontWeight: '700' }]}>
                   {topThree[0].totalPoints} pts
                 </Text>
                 <View style={[styles.podiumBlock, { height: 85, backgroundColor: '#FCD34D' }]}>
@@ -120,8 +121,8 @@ export default function StudentLeaderboardScreen() {
 
               {/* 3rd Place */}
               <View style={[styles.podiumCol, styles.podiumCol3]}>
-                <View style={[styles.podiumAvatar, { backgroundColor: '#FFEDD5' }]}>
-                  <Text style={styles.podiumMedal}>🥉</Text>
+                <View style={[styles.podiumAvatar, { backgroundColor: '#FFEDD5', borderColor: '#FED7AA' }]}>
+                  <Ionicons name="medal-outline" size={20} color="#C2410C" />
                 </View>
                 <Text style={[styles.podiumName, { color: theme.text }]} numberOfLines={1}>
                   {topThree[2].fullName}
@@ -174,22 +175,22 @@ export default function StudentLeaderboardScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-    paddingBottom: 24,
+    padding: 20,
+    paddingBottom: 28,
   },
   heroCard: {
-    padding: 18,
-    borderRadius: 20,
+    padding: 20,
+    borderRadius: 18,
     borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
     shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 3,
   },
   heroLeft: {
     flex: 1,
@@ -218,8 +219,8 @@ const styles = StyleSheet.create({
   heroRankBadge: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 10,
     alignItems: 'center',
   },
   heroRankNumber: {
@@ -234,9 +235,11 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   heroPointsPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   heroPointsText: {
@@ -245,8 +248,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   podiumContainer: {
-    padding: 16,
-    borderRadius: 20,
+    padding: 18,
+    borderRadius: 18,
     borderWidth: 1,
     marginBottom: 16,
   },
@@ -259,7 +262,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'center',
-    gap: 12,
+    gap: 16,
     paddingTop: 10,
   },
   podiumCol: {
@@ -275,12 +278,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-  },
-  podiumMedal: {
-    fontSize: 20,
   },
   podiumName: {
     fontSize: 12,

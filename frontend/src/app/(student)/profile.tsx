@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { logoutThunk } from '../../store/slices/authSlice';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -29,6 +30,11 @@ export default function StudentProfileScreen() {
       .toUpperCase();
   };
 
+  const rollNumber = user?.rollNumber || myRank?.rollNumber || '-';
+  const gradeLevel = user?.gradeLevel || myRank?.gradeLevel || '-';
+  const rankDisplay = myRank?.rank ? `#${myRank.rank}` : '-';
+  const totalPoints = myRank?.totalPoints ?? user?.totalPoints ?? 0;
+
   return (
     <LayoutContainer>
       <Header title="My Profile" subtitle="Student Account" />
@@ -49,18 +55,14 @@ export default function StudentProfileScreen() {
 
         <View style={styles.statsRow}>
           <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={styles.statIcon}>🏆</Text>
-            <Text style={[styles.statValue, { color: theme.text }]}>
-              #{myRank?.rank || user?.studentProfileId ? '7' : '-'}
-            </Text>
+            <Ionicons name="trophy-outline" size={24} color={theme.gold} style={styles.statIcon} />
+            <Text style={[styles.statValue, { color: theme.text }]}>{rankDisplay}</Text>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Current Rank</Text>
           </View>
 
           <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={styles.statIcon}>⭐</Text>
-            <Text style={[styles.statValue, { color: theme.text }]}>
-              {myRank?.totalPoints ?? user?.totalPoints ?? 0}
-            </Text>
+            <Ionicons name="star-outline" size={24} color={theme.accent} style={styles.statIcon} />
+            <Text style={[styles.statValue, { color: theme.text }]}>{totalPoints}</Text>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Total Points</Text>
           </View>
         </View>
@@ -70,21 +72,12 @@ export default function StudentProfileScreen() {
 
           <View style={styles.detailRow}>
             <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Roll Number</Text>
-            <Text style={[styles.detailValue, { color: theme.text }]}>
-              {user?.rollNumber || myRank?.rollNumber || 'RBU-2026-001'}
-            </Text>
+            <Text style={[styles.detailValue, { color: theme.text }]}>{rollNumber}</Text>
           </View>
 
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Department</Text>
-            <Text style={[styles.detailValue, { color: theme.text }]}>
-              {user?.gradeLevel || myRank?.gradeLevel || 'Computer Science'}
-            </Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Institution</Text>
-            <Text style={[styles.detailValue, { color: theme.text }]}>Ramdeobaba University</Text>
+          <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
+            <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>Department / Class</Text>
+            <Text style={[styles.detailValue, { color: theme.text }]}>{gradeLevel}</Text>
           </View>
         </View>
 
@@ -111,7 +104,8 @@ export default function StudentProfileScreen() {
           style={[styles.logoutBtn, { backgroundColor: theme.error + '15', borderColor: theme.error }]}
           onPress={handleLogout}
         >
-          <Text style={[styles.logoutText, { color: theme.error }]}>🚪 Sign Out</Text>
+          <Feather name="log-out" size={18} color={theme.error} style={{ marginRight: 8 }} />
+          <Text style={[styles.logoutText, { color: theme.error }]}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </LayoutContainer>
@@ -173,7 +167,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statIcon: {
-    fontSize: 24,
     marginBottom: 6,
   },
   statValue: {
@@ -234,6 +227,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 14,
     borderWidth: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAppSelector } from '../store';
 import { useAppTheme } from '../context/ThemeContext';
@@ -28,7 +29,7 @@ export default function IndexScreen() {
     <LayoutContainer>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.logoCircle, { backgroundColor: theme.primaryLight }]}>
-          <Text style={styles.logoText}>🎓</Text>
+          <Ionicons name="school-outline" size={40} color={theme.primary} />
         </View>
         <Text style={[styles.brandTitle, { color: theme.text }]}>EduRank LMS</Text>
         <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Student Management & Leaderboard</Text>
@@ -52,9 +53,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-  },
-  logoText: {
-    fontSize: 40,
   },
   brandTitle: {
     fontSize: 24,

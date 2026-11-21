@@ -10,13 +10,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { loginThunk, clearAuthError } from '../../store/slices/authSlice';
 import { useAppTheme } from '../../context/ThemeContext';
 import { LayoutContainer } from '../../components/LayoutContainer';
 
-// User authentication screen with credentials and quick demonstration shortcuts
+// User authentication screen with credentials and role routing
 export default function LoginScreen() {
   const { theme, isDark, toggleTheme } = useAppTheme();
   const dispatch = useAppDispatch();
@@ -25,34 +26,19 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async (eEmail?: string, ePassword?: string) => {
-    const loginEmail = eEmail || email;
-    const loginPassword = ePassword || password;
-
-    if (!loginEmail.trim() || !loginPassword.trim()) {
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
       return;
     }
 
     dispatch(clearAuthError());
-    const result = await dispatch(loginThunk({ email: loginEmail.trim(), password: loginPassword }));
+    const result = await dispatch(loginThunk({ email: email.trim(), password }));
     if (loginThunk.fulfilled.match(result)) {
       if (result.payload.user.role === 'TEACHER') {
         router.replace('/(teacher)');
       } else {
         router.replace('/(student)');
       }
-    }
-  };
-
-  const handleQuickDemo = (role: 'TEACHER' | 'STUDENT') => {
-    if (role === 'TEACHER') {
-      setEmail('teacher@rbu.edu');
-      setPassword('Teacher123!');
-      handleLogin('teacher@rbu.edu', 'Teacher123!');
-    } else {
-      setEmail('student@rbu.edu');
-      setPassword('Student123!');
-      handleLogin('student@rbu.edu', 'Student123!');
     }
   };
 
@@ -71,93 +57,73 @@ export default function LoginScreen() {
             <TouchableOpacity
               onPress={toggleTheme}
               style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
+              accessibilityLabel="Toggle Theme"
             >
-              <Text style={styles.themeIcon}>{isDark ? '☀️' : '🌙'}</Text>
+              <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.header}>
-            <View style={[styles.brandBadge, { backgroundColor: theme.primaryLight }]}>
-              <Text style={styles.brandIcon}>🎓</Text>
+          <View style={styles.cardWrapper}>
+            <View style={styles.header}>
+              <View style={[styles.brandBadge, { backgroundColor: theme.primaryLight }]}>
+                <Ionicons name="school-outline" size={28} color={theme.primary} />
+              </View>
+              <Text style={[styles.title, { color: theme.text }]}>Welcome Back</Text>
+              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                Sign in to your academic account
+              </Text>
             </View>
-            <Text style={[styles.title, { color: theme.text }]}>Welcome Back</Text>
-            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-              Sign in to track points and rankings
-            </Text>
-          </View>
 
-          {error && (
-            <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
-              <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
-            </View>
-          )}
+            {error && (
+              <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
+                <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
+              </View>
+            )}
 
-          <View style={[styles.formCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Email Address</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="e.g. alex@rbu.edu"
-              placeholderTextColor={theme.textMuted}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
+            <View style={[styles.formCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Email Address</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                placeholderTextColor={theme.textMuted}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
 
-            <Text style={[styles.label, { color: theme.textSecondary }]}>Password</Text>
-            <TextInput
-              style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              placeholderTextColor={theme.textMuted}
-              secureTextEntry
-            />
-
-            <TouchableOpacity
-              style={[styles.loginBtn, { backgroundColor: theme.primary }]}
-              onPress={() => handleLogin()}
-              disabled={isLoading}
-              activeOpacity={0.8}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <Text style={styles.loginBtnText}>Sign In</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.quickSection}>
-            <Text style={[styles.quickTitle, { color: theme.textMuted }]}>
-              ⚡ Quick Demo Shortcuts
-            </Text>
-            <View style={styles.quickButtonsRow}>
-              <TouchableOpacity
-                style={[styles.quickBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
-                onPress={() => handleQuickDemo('TEACHER')}
-              >
-                <Text style={[styles.quickBtnText, { color: theme.primary }]}>👩‍🏫 Teacher Demo</Text>
-                <Text style={[styles.quickBtnSub, { color: theme.textSecondary }]}>teacher@rbu.edu</Text>
-              </TouchableOpacity>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Password</Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Enter your password"
+                placeholderTextColor={theme.textMuted}
+                secureTextEntry
+              />
 
               <TouchableOpacity
-                style={[styles.quickBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
-                onPress={() => handleQuickDemo('STUDENT')}
+                style={[styles.loginBtn, { backgroundColor: theme.primary }]}
+                onPress={handleLogin}
+                disabled={isLoading}
+                activeOpacity={0.8}
               >
-                <Text style={[styles.quickBtnText, { color: theme.accent }]}>👨‍🎓 Student Demo</Text>
-                <Text style={[styles.quickBtnSub, { color: theme.textSecondary }]}>student@rbu.edu</Text>
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text style={styles.loginBtnText}>Sign In</Text>
+                )}
               </TouchableOpacity>
             </View>
-          </View>
 
-          <View style={styles.footerRow}>
-            <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-              Don't have an account?{' '}
-            </Text>
-            <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-              <Text style={[styles.signupLink, { color: theme.primary }]}>Sign Up</Text>
-            </TouchableOpacity>
+            <View style={styles.footerRow}>
+              <Text style={[styles.footerText, { color: theme.textSecondary }]}>
+                Don't have an account?{' '}
+              </Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+                <Text style={[styles.signupLink, { color: theme.primary }]}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -170,12 +136,15 @@ const styles = StyleSheet.create({
     padding: 24,
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   topBar: {
+    width: '100%',
+    maxWidth: 440,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   themeBtn: {
     width: 38,
@@ -185,8 +154,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  themeIcon: {
-    fontSize: 16,
+  cardWrapper: {
+    width: '100%',
+    maxWidth: 440,
   },
   header: {
     alignItems: 'center',
@@ -195,13 +165,10 @@ const styles = StyleSheet.create({
   brandBadge: {
     width: 60,
     height: 60,
-    borderRadius: 20,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
-  },
-  brandIcon: {
-    fontSize: 30,
   },
   title: {
     fontSize: 24,
@@ -224,7 +191,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formCard: {
-    padding: 20,
+    padding: 22,
     borderRadius: 18,
     borderWidth: 1,
     shadowColor: '#000',
@@ -257,38 +224,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
-  },
-  quickSection: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  quickTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 10,
-  },
-  quickButtonsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    width: '100%',
-  },
-  quickBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  quickBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  quickBtnSub: {
-    fontSize: 10,
-    marginTop: 2,
   },
   footerRow: {
     flexDirection: 'row',

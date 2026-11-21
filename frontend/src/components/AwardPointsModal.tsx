@@ -8,6 +8,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useAppTheme } from '../context/ThemeContext';
 import { LeaderboardItem, awardPointsThunk, optimisticPointAward } from '../store/slices/leaderboardSlice';
 import { useAppDispatch, useAppSelector } from '../store';
@@ -83,9 +84,9 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
       <View style={styles.overlay}>
         <View style={[styles.dialog, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.text }]}>Award Points</Text>
+            <Text style={[styles.title, { color: theme.text }]}>Award Performance Points</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={[styles.closeText, { color: theme.textSecondary }]}>✕</Text>
+              <Feather name="x" size={20} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -137,7 +138,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
             style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
             value={reason}
             onChangeText={setReason}
-            placeholder="e.g. Completed homework assignment"
+            placeholder="e.g. Coursework assignment"
             placeholderTextColor={theme.textMuted}
           />
 
@@ -180,10 +181,10 @@ const styles = StyleSheet.create({
   },
   dialog: {
     width: '100%',
-    maxWidth: 440,
-    borderRadius: 20,
+    maxWidth: 460,
+    borderRadius: 18,
     borderWidth: 1,
-    padding: 20,
+    padding: 22,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15,
@@ -197,15 +198,11 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   title: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '700',
   },
   closeBtn: {
     padding: 4,
-  },
-  closeText: {
-    fontSize: 16,
-    fontWeight: '700',
   },
   studentBox: {
     padding: 12,

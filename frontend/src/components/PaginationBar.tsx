@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useAppTheme } from '../context/ThemeContext';
 
 interface PaginationBarProps {
@@ -20,7 +21,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
   return (
     <View style={[styles.container, { borderTopColor: theme.border, backgroundColor: theme.card }]}>
       <Text style={[styles.totalText, { color: theme.textSecondary }]}>
-        Total {totalElements} students
+        Showing {totalElements} total students
       </Text>
 
       <View style={styles.controls}>
@@ -33,8 +34,14 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
           onPress={() => onPageChange(page - 1)}
           disabled={page === 0}
         >
+          <Feather
+            name="chevron-left"
+            size={16}
+            color={page === 0 ? theme.textMuted : theme.text}
+            style={{ marginRight: 2 }}
+          />
           <Text style={[styles.navBtnText, { color: page === 0 ? theme.textMuted : theme.text }]}>
-            ◀ Prev
+            Previous
           </Text>
         </TouchableOpacity>
 
@@ -57,8 +64,14 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
               { color: page >= totalPages - 1 || totalPages === 0 ? theme.textMuted : theme.text },
             ]}
           >
-            Next ▶
+            Next
           </Text>
+          <Feather
+            name="chevron-right"
+            size={16}
+            color={page >= totalPages - 1 || totalPages === 0 ? theme.textMuted : theme.text}
+            style={{ marginLeft: 2 }}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -70,8 +83,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     borderTopWidth: 1,
   },
   totalText: {
@@ -84,8 +97,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   navBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
   },
@@ -99,6 +114,6 @@ const styles = StyleSheet.create({
   pageIndicator: {
     fontSize: 12,
     fontWeight: '700',
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
   },
 });

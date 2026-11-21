@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { useAppTheme } from '../context/ThemeContext';
 import { LeaderboardItem } from '../store/slices/leaderboardSlice';
 
@@ -19,10 +20,10 @@ export const RankCard: React.FC<RankCardProps> = ({
   const { theme } = useAppTheme();
 
   const getRankBadge = (rank: number) => {
-    if (rank === 1) return { bg: '#FEF3C7', color: '#D97706', label: '🥇 1st' };
-    if (rank === 2) return { bg: '#F1F5F9', color: '#64748B', label: '🥈 2nd' };
-    if (rank === 3) return { bg: '#FFEDD5', color: '#C2410C', label: '🥉 3rd' };
-    return { bg: theme.surface, color: theme.textSecondary, label: `#${rank}` };
+    if (rank === 1) return { bg: '#FEF3C7', color: '#B45309', border: '#FDE68A', label: '1st' };
+    if (rank === 2) return { bg: '#F1F5F9', color: '#475569', border: '#E2E8F0', label: '2nd' };
+    if (rank === 3) return { bg: '#FFEDD5', color: '#9A3412', border: '#FED7AA', label: '3rd' };
+    return { bg: theme.surface, color: theme.textSecondary, border: theme.border, label: `#${rank}` };
   };
 
   const badge = getRankBadge(item.rank);
@@ -47,7 +48,7 @@ export const RankCard: React.FC<RankCardProps> = ({
       ]}
     >
       <View style={styles.leftRow}>
-        <View style={[styles.rankBadge, { backgroundColor: badge.bg }]}>
+        <View style={[styles.rankBadge, { backgroundColor: badge.bg, borderColor: badge.border }]}>
           <Text style={[styles.rankText, { color: badge.color }]}>{badge.label}</Text>
         </View>
 
@@ -76,7 +77,7 @@ export const RankCard: React.FC<RankCardProps> = ({
 
       <View style={styles.rightRow}>
         <View style={[styles.pointsPill, { backgroundColor: theme.accentLight }]}>
-          <Text style={styles.starIcon}>⭐</Text>
+          <Ionicons name="star" size={13} color={theme.accent} />
           <Text style={[styles.pointsText, { color: theme.accent }]}>
             {item.totalPoints} <Text style={styles.ptsUnit}>pts</Text>
           </Text>
@@ -88,7 +89,8 @@ export const RankCard: React.FC<RankCardProps> = ({
             onPress={() => onAwardPress && onAwardPress(item)}
             activeOpacity={0.8}
           >
-            <Text style={styles.awardButtonText}>+ Award</Text>
+            <Feather name="plus" size={14} color="#FFFFFF" style={{ marginRight: 2 }} />
+            <Text style={styles.awardButtonText}>Award</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -103,9 +105,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 14,
     paddingHorizontal: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   leftRow: {
     flexDirection: 'row',
@@ -117,7 +119,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
-    minWidth: 42,
+    borderWidth: 1,
+    minWidth: 44,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -178,9 +181,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
-  starIcon: {
-    fontSize: 12,
-  },
   pointsText: {
     fontSize: 13,
     fontWeight: '700',
@@ -190,7 +190,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   awardButton: {
-    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
   },

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { useAppTheme } from '../context/ThemeContext';
 import { useAppDispatch, useAppSelector } from '../store';
 import { logoutThunk } from '../store/slices/authSlice';
@@ -22,7 +23,7 @@ export const Header: React.FC<{ title?: string; subtitle?: string }> = ({
     <View style={[styles.headerContainer, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
       <View style={styles.leftSection}>
         <View style={[styles.logoIcon, { backgroundColor: theme.primaryLight }]}>
-          <Text style={[styles.logoText, { color: theme.primary }]}>🎓</Text>
+          <Ionicons name="school-outline" size={22} color={theme.primary} />
         </View>
         <View>
           <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
@@ -30,7 +31,7 @@ export const Header: React.FC<{ title?: string; subtitle?: string }> = ({
             <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{subtitle}</Text>
           ) : user ? (
             <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-              {user.fullName} ({user.role === 'TEACHER' ? 'Faculty' : 'Student'})
+              {user.fullName} • {user.role === 'TEACHER' ? 'Faculty' : 'Student'}
             </Text>
           ) : null}
         </View>
@@ -42,7 +43,7 @@ export const Header: React.FC<{ title?: string; subtitle?: string }> = ({
           style={[styles.actionButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
           accessibilityLabel="Toggle Theme"
         >
-          <Text style={styles.actionIcon}>{isDark ? '☀️' : '🌙'}</Text>
+          <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
         </TouchableOpacity>
 
         {user && (
@@ -51,7 +52,7 @@ export const Header: React.FC<{ title?: string; subtitle?: string }> = ({
             style={[styles.actionButton, styles.logoutButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
             accessibilityLabel="Sign Out"
           >
-            <Text style={styles.actionIcon}>🚪</Text>
+            <Feather name="log-out" size={17} color={theme.error} />
           </TouchableOpacity>
         )}
       </View>
@@ -75,14 +76,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   logoIcon: {
-    width: 42,
-    height: 42,
+    width: 40,
+    height: 40,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoText: {
-    fontSize: 22,
   },
   title: {
     fontSize: 18,
@@ -109,8 +107,5 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginLeft: 2,
-  },
-  actionIcon: {
-    fontSize: 16,
   },
 });

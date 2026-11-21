@@ -2,13 +2,13 @@ import React from 'react';
 import { View, StyleSheet, Platform, SafeAreaView } from 'react-native';
 import { useAppTheme } from '../context/ThemeContext';
 
-// Mobile-responsive wrapper providing a clean centered app frame on web viewports
+// Responsive wrapper providing adaptive desktop centering and fluid mobile sizing
 export const LayoutContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme } = useAppTheme();
 
   return (
     <SafeAreaView style={[styles.outerContainer, { backgroundColor: theme.background }]}>
-      <View style={[styles.innerFrame, { backgroundColor: theme.card, borderColor: theme.border }]}>
+      <View style={[styles.innerFrame, { backgroundColor: theme.card }]}>
         {children}
       </View>
     </SafeAreaView>
@@ -18,24 +18,21 @@ export const LayoutContainer: React.FC<{ children: React.ReactNode }> = ({ child
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     width: '100%',
-    height: '100%',
+    minHeight: '100%',
+    alignItems: 'center',
   },
   innerFrame: {
     flex: 1,
     width: '100%',
-    maxWidth: 520,
-    overflow: 'hidden',
+    maxWidth: 860,
+    minHeight: '100%',
     ...Platform.select({
       web: {
-        height: '100%',
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
-      },
-      default: {
-        height: '100%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.04,
+        shadowRadius: 12,
       },
     }),
   },
