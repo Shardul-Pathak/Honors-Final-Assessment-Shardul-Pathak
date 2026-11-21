@@ -9,6 +9,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -17,7 +18,7 @@ import { loginThunk, clearAuthError } from '../../store/slices/authSlice';
 import { useAppTheme } from '../../context/ThemeContext';
 import { LayoutContainer } from '../../components/LayoutContainer';
 
-// User authentication screen with credentials and role routing
+// User authentication screen matching wireframe mockup
 export default function LoginScreen() {
   const { theme, isDark, toggleTheme } = useAppTheme();
   const dispatch = useAppDispatch();
@@ -25,6 +26,8 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [forgotModalVisible, setForgotModalVisible] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -42,6 +45,12 @@ export default function LoginScreen() {
     }
   };
 
+  const handleGoogleSSO = () => {
+    // Fill demo student for instant access
+    setEmail('student@rbu.edu');
+    setPassword('Student123!');
+  };
+
   return (
     <LayoutContainer>
       <KeyboardAvoidingView
@@ -52,36 +61,65 @@ export default function LoginScreen() {
           contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.topBar}>
-            <View />
-            <TouchableOpacity
-              onPress={toggleTheme}
-              style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
-              accessibilityLabel="Toggle Theme"
-              accessibilityRole="button"
-            >
-              <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
-            </TouchableOpacity>
-          </View>
-
           <View style={styles.cardWrapper}>
-            <View style={styles.header}>
-              <View style={[styles.brandBadge, { backgroundColor: theme.primaryLight }]}>
-                <Ionicons name="school-outline" size={28} color={theme.primary} />
-              </View>
-              <Text style={[styles.title, { color: theme.text }]}>Welcome Back</Text>
-              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-                Sign in to your academic account
-              </Text>
+            {/* Top Navigation & Theme Toggle */}
+            <View style={styles.topBar}>
+              <TouchableOpacity
+                onPress={() => router.push('/')}
+                style={styles.backBtn}
+                accessibilityRole="button"
+              >
+                <Feather name="arrow-left" size={18} color={theme.text} style={{ marginRight: 6 }} />
+                <Text style={[styles.backText, { color: theme.text }]}>Home</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={toggleTheme}
+                style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
+                accessibilityLabel="Toggle Theme"
+                accessibilityRole="button"
+              >
+                <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
+              </TouchableOpacity>
             </View>
 
-            {error && (
-              <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
-                <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
-              </View>
-            )}
+            {/* Segmented Top Bar: [ LOGIN ] | [ REGISTER ] */}
+            <View style={[styles.segmentedBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <TouchableOpacity
+                style={[styles.segmentTab, styles.segmentTabActive, { backgroundColor: theme.card }]}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: true }}
+              >
+                <Text style={[styles.segmentText, styles.segmentTextActive, { color: theme.primary }]}>
+                  LOGIN
+                </Text>
+              </TouchableOpacity>
 
+              <TouchableOpacity
+                style={styles.segmentTab}
+                onPress={() => router.push('/(auth)/register')}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: false }}
+              >
+                <Text style={[styles.segmentText, { color: theme.textSecondary }]}>REGISTER</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Sign In Form Container */}
             <View style={[styles.formCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={styles.header}>
+                <Text style={[styles.title, { color: theme.text }]}>Sign In</Text>
+                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                  Enter your university credentials
+                </Text>
+              </View>
+
+              {error && (
+                <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
+                  <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
+                </View>
+              )}
+
               <Text style={[styles.label, { color: theme.textSecondary }]}>Email Address</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
@@ -94,14 +132,38 @@ export default function LoginScreen() {
               />
 
               <Text style={[styles.label, { color: theme.textSecondary }]}>Password</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                placeholderTextColor={theme.textMuted}
-                secureTextEntry
-              />
+              <View style={styles.passwordWrapper}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.passwordInput,
+                    { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border },
+                  ]}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Enter your password"
+                  placeholderTextColor={theme.textMuted}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeBtn}
+                  onPress={() => setShowPassword(!showPassword)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Toggle password visibility"
+                >
+                  <Feather
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={18}
+                    color={theme.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.forgotRow}>
+                <TouchableOpacity onPress={() => setForgotModalVisible(true)} accessibilityRole="link">
+                  <Text style={[styles.forgotText, { color: theme.primary }]}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity
                 style={[
@@ -118,74 +180,136 @@ export default function LoginScreen() {
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" size="small" />
                 ) : (
-                  <Text style={styles.loginBtnText}>Sign In</Text>
+                  <Text style={styles.loginBtnText}>LOG IN</Text>
                 )}
               </TouchableOpacity>
-            </View>
 
-            <View style={styles.footerRow}>
-              <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-                Don't have an account?{' '}
-              </Text>
+              <View style={styles.dividerRow}>
+                <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+                <Text style={[styles.dividerText, { color: theme.textMuted }]}>or</Text>
+                <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+              </View>
+
+              {/* Social / Campus SSO button */}
               <TouchableOpacity
-                onPress={() => router.push('/(auth)/register')}
-                accessibilityRole="link"
-                style={styles.linkTouch}
+                style={[styles.googleBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                onPress={handleGoogleSSO}
+                accessibilityRole="button"
               >
-                <Text style={[styles.signupLink, { color: theme.primary }]}>Sign Up</Text>
+                <Ionicons name="logo-google" size={16} color="#EA4335" style={{ marginRight: 8 }} />
+                <Text style={[styles.googleBtnText, { color: theme.text }]}>Continue with Google</Text>
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Forgot Password Modal */}
+      <Modal visible={forgotModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Reset Password</Text>
+            <Text style={[styles.modalDesc, { color: theme.textSecondary }]}>
+              Password resets are handled by university IT administrators. Default demo credentials:
+            </Text>
+            <View style={[styles.credsBox, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.credLine, { color: theme.text }]}>
+                Student: <Text style={{ fontWeight: '700' }}>student@rbu.edu / Student123!</Text>
+              </Text>
+              <Text style={[styles.credLine, { color: theme.text }]}>
+                Teacher: <Text style={{ fontWeight: '700' }}>teacher@rbu.edu / Teacher123!</Text>
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.modalCloseBtn, { backgroundColor: theme.primary }]}
+              onPress={() => setForgotModalVisible(false)}
+              accessibilityRole="button"
+            >
+              <Text style={styles.modalCloseText}>Got It</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </LayoutContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 24,
+    padding: 20,
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  topBar: {
+  cardWrapper: {
     width: '100%',
     maxWidth: 440,
+  },
+  topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    cursor: 'pointer',
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   themeBtn: {
-    width: 38,
-    height: 38,
+    width: 36,
+    height: 36,
     borderRadius: 10,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
   },
-  cardWrapper: {
-    width: '100%',
-    maxWidth: 440,
+  segmentedBar: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 4,
+    marginBottom: 16,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  brandBadge: {
-    width: 60,
-    height: 60,
-    borderRadius: 18,
+  segmentTab: {
+    flex: 1,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    borderRadius: 8,
+    cursor: 'pointer',
+  },
+  segmentTabActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  segmentText: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  segmentTextActive: {},
+  formCard: {
+    padding: 22,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  header: {
+    marginBottom: 18,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 13,
@@ -195,22 +319,12 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   errorText: {
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
-  },
-  formCard: {
-    padding: 22,
-    borderRadius: 18,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
   },
   label: {
     fontSize: 12,
@@ -225,12 +339,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 14,
   },
+  passwordWrapper: {
+    position: 'relative',
+    marginBottom: 8,
+  },
+  passwordInput: {
+    marginBottom: 0,
+    paddingRight: 44,
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: 12,
+    top: 13,
+    padding: 2,
+    cursor: 'pointer',
+  },
+  forgotRow: {
+    alignItems: 'flex-end',
+    marginBottom: 16,
+  },
+  forgotText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
   loginBtn: {
     height: 48,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 6,
     cursor: 'pointer',
   },
   disabledBtn: {
@@ -239,23 +375,81 @@ const styles = StyleSheet.create({
   },
   loginBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
-  footerRow: {
+  dividerRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 24,
+    marginVertical: 16,
+    gap: 10,
   },
-  footerText: {
-    fontSize: 13,
+  dividerLine: {
+    flex: 1,
+    height: 1,
   },
-  linkTouch: {
+  dividerText: {
+    fontSize: 12,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+  },
+  googleBtn: {
+    height: 46,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     cursor: 'pointer',
   },
-  signupLink: {
+  googleBtnText: {
     fontSize: 13,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalBox: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  modalDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  credsBox: {
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 16,
+    gap: 4,
+  },
+  credLine: {
+    fontSize: 12,
+  },
+  modalCloseBtn: {
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  modalCloseText: {
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '700',
   },
 });

@@ -13,6 +13,38 @@ export interface LeaderboardItem {
   lastPointsAwardedAt?: string;
 }
 
+export interface PointTransactionItem {
+  id: string;
+  pointsDelta: number;
+  reason: string;
+  awardedByName: string;
+  studentName?: string;
+  studentRollNumber?: string;
+  studentProfileId?: string;
+  createdAt: string;
+}
+
+export interface OverviewStats {
+  totalStudents: number;
+  totalPointsDistributed: number;
+  topScore: number;
+  avgScore: number;
+}
+
+export interface UserItem {
+  id: string;
+  fullName: string;
+  email: string;
+  role: 'STUDENT' | 'TEACHER';
+  studentProfileId?: string;
+  rollNumber?: string;
+  gradeLevel?: string;
+  totalPoints?: number;
+  phoneNumber?: string;
+  status: string;
+  createdAt?: string;
+}
+
 export interface LeaderboardState {
   students: LeaderboardItem[];
   page: number;
@@ -20,6 +52,13 @@ export interface LeaderboardState {
   totalElements: number;
   totalPages: number;
   myRank: LeaderboardItem | null;
+  recentTransactions: PointTransactionItem[];
+  myHistory: PointTransactionItem[];
+  overviewStats: OverviewStats | null;
+  usersList: UserItem[];
+  usersLoading: boolean;
+  selectedDepartment: string;
+  selectedTerm: string;
   isLoading: boolean;
   isRefreshing: boolean;
   isAwarding: boolean;
@@ -34,6 +73,13 @@ const initialState: LeaderboardState = {
   totalElements: 0,
   totalPages: 0,
   myRank: null,
+  recentTransactions: [],
+  myHistory: [],
+  overviewStats: null,
+  usersList: [],
+  usersLoading: false,
+  selectedDepartment: 'All',
+  selectedTerm: 'Fall 2026',
   isLoading: false,
   isRefreshing: false,
   isAwarding: false,
@@ -43,9 +89,18 @@ const initialState: LeaderboardState = {
 
 export const fetchLeaderboardThunk = createAsyncThunk(
   'leaderboard/fetchLeaderboard',
-  async ({ page = 0, size = 10 }: { page?: number; size?: number }, { rejectWithValue }) => {
+  async (
+    params: { page?: number; size?: number; department?: string } = {},
+    { rejectWithValue }
+  ) => {
     try {
-      const response = await api.get(`/leaderboard?page=${page}&size=${size}&sortBy=totalPoints&direction=desc`);
+      const page = params.page ?? 0;
+      const size = params.size ?? 10;
+      let url = `/leaderboard?page=${page}&size=${size}&sortBy=totalPoints&direction=desc`;
+      if (params.department && params.department !== 'All') {
+        url += `&department=${encodeURIComponent(params.department)}`;
+      }
+      const response = await api.get(url);
       return response.data;
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Failed to load leaderboard';
@@ -83,12 +138,78 @@ export const awardPointsThunk = createAsyncThunk(
   }
 );
 
+export const fetchRecentTransactionsThunk = createAsyncThunk(
+  'leaderboard/fetchRecentTransactions',
+  async (limit: number = 10, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/points/recent?limit=${limit}`);
+      return response.data;
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || 'Failed to load recent activity';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchMyHistoryThunk = createAsyncThunk(
+  'leaderboard/fetchMyHistory',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/points/my-history');
+      return response.data;
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || 'Failed to load points history';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchOverviewStatsThunk = createAsyncThunk(
+  'leaderboard/fetchOverviewStats',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/points/stats');
+      return response.data;
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || 'Failed to load overview stats';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const fetchUsersThunk = createAsyncThunk(
+  'leaderboard/fetchUsers',
+  async (params: { query?: string; role?: string } | void, { rejectWithValue }) => {
+    try {
+      const p = params || {};
+      let url = '/users';
+      const searchParams = new URLSearchParams();
+      if (p.query) searchParams.append('query', p.query);
+      if (p.role && p.role !== 'ALL') searchParams.append('role', p.role);
+      const qs = searchParams.toString();
+      if (qs) url += `?${qs}`;
+
+      const response = await api.get(url);
+      return response.data;
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || 'Failed to load users list';
+      return rejectWithValue(message);
+    }
+  }
+);
+
 const leaderboardSlice = createSlice({
   name: 'leaderboard',
   initialState,
   reducers: {
     clearAwardMessage: (state) => {
       state.awardSuccessMessage = null;
+    },
+    setSelectedDepartment: (state, action: PayloadAction<string>) => {
+      state.selectedDepartment = action.payload;
+    },
+    setSelectedTerm: (state, action: PayloadAction<string>) => {
+      state.selectedTerm = action.payload;
     },
     // Optimistic point update to immediately reorder UI
     optimisticPointAward: (
@@ -99,13 +220,16 @@ const leaderboardSlice = createSlice({
       const index = state.students.findIndex((s) => s.studentProfileId === studentProfileId);
       if (index !== -1) {
         state.students[index].totalPoints += points;
-        // Deterministic descending sort
         state.students.sort((a, b) => b.totalPoints - a.totalPoints);
-        // Recalculate ranks on current page
         const startingRank = state.page * state.size + 1;
         state.students.forEach((item, idx) => {
           item.rank = startingRank + idx;
         });
+      }
+      // Also update in users list if present
+      const uIndex = state.usersList.findIndex((u) => u.studentProfileId === studentProfileId);
+      if (uIndex !== -1 && state.usersList[uIndex].totalPoints !== undefined) {
+        state.usersList[uIndex].totalPoints! += points;
       }
     },
   },
@@ -156,9 +280,38 @@ const leaderboardSlice = createSlice({
       .addCase(awardPointsThunk.rejected, (state, action) => {
         state.isAwarding = false;
         state.error = action.payload as string;
+      })
+      // Recent Transactions
+      .addCase(fetchRecentTransactionsThunk.fulfilled, (state, action) => {
+        state.recentTransactions = action.payload;
+      })
+      // My History
+      .addCase(fetchMyHistoryThunk.fulfilled, (state, action) => {
+        state.myHistory = action.payload;
+      })
+      // Overview Stats
+      .addCase(fetchOverviewStatsThunk.fulfilled, (state, action) => {
+        state.overviewStats = action.payload;
+      })
+      // Users List
+      .addCase(fetchUsersThunk.pending, (state) => {
+        state.usersLoading = true;
+      })
+      .addCase(fetchUsersThunk.fulfilled, (state, action) => {
+        state.usersLoading = false;
+        state.usersList = action.payload;
+      })
+      .addCase(fetchUsersThunk.rejected, (state) => {
+        state.usersLoading = false;
       });
   },
 });
 
-export const { clearAwardMessage, optimisticPointAward } = leaderboardSlice.actions;
+export const {
+  clearAwardMessage,
+  optimisticPointAward,
+  setSelectedDepartment,
+  setSelectedTerm,
+} = leaderboardSlice.actions;
+
 export default leaderboardSlice.reducer;

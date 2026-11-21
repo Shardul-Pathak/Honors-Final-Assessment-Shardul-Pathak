@@ -17,7 +17,7 @@ import { registerThunk, clearAuthError } from '../../store/slices/authSlice';
 import { useAppTheme } from '../../context/ThemeContext';
 import { LayoutContainer } from '../../components/LayoutContainer';
 
-// Registration screen with role selection and student profile inputs
+// User registration screen matching wireframe mockup
 export default function RegisterScreen() {
   const { theme, isDark, toggleTheme } = useAppTheme();
   const dispatch = useAppDispatch();
@@ -26,23 +26,40 @@ export default function RegisterScreen() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<'STUDENT' | 'TEACHER'>('STUDENT');
   const [rollNumber, setRollNumber] = useState('');
-  const [gradeLevel, setGradeLevel] = useState('');
+  const [gradeLevel, setGradeLevel] = useState('Computer Science');
+  const [agreedToTerms, setAgreedToTerms] = useState(true);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleRegister = async () => {
     if (!fullName.trim() || !email.trim() || !password.trim()) {
+      setValidationError('Please complete all required fields');
       return;
     }
 
+    if (password !== confirmPassword) {
+      setValidationError('Passwords do not match');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setValidationError('You must agree to the Terms of Service');
+      return;
+    }
+
+    setValidationError(null);
     dispatch(clearAuthError());
+
     const payload = {
       fullName: fullName.trim(),
       email: email.trim().toLowerCase(),
       password,
       role,
-      rollNumber: role === 'STUDENT' ? rollNumber.trim() : undefined,
-      gradeLevel: role === 'STUDENT' ? gradeLevel.trim() : undefined,
+      rollNumber: role === 'STUDENT' ? (rollNumber.trim() || `RBU-${Math.floor(1000 + Math.random() * 9000)}`) : undefined,
+      gradeLevel: role === 'STUDENT' ? (gradeLevel.trim() || 'Computer Science') : undefined,
     };
 
     const result = await dispatch(registerThunk(payload));
@@ -55,6 +72,8 @@ export default function RegisterScreen() {
     }
   };
 
+  const displayError = validationError || error;
+
   return (
     <LayoutContainer>
       <KeyboardAvoidingView
@@ -66,16 +85,17 @@ export default function RegisterScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.cardWrapper}>
+            {/* Top Navigation & Theme Toggle */}
             <View style={styles.topBar}>
               <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => router.push('/')}
                 style={styles.backBtn}
                 accessibilityRole="button"
-                accessibilityLabel="Go back"
               >
                 <Feather name="arrow-left" size={18} color={theme.text} style={{ marginRight: 6 }} />
-                <Text style={[styles.backText, { color: theme.text }]}>Back</Text>
+                <Text style={[styles.backText, { color: theme.text }]}>Home</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 onPress={toggleTheme}
                 style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
@@ -86,20 +106,44 @@ export default function RegisterScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.header}>
-              <Text style={[styles.title, { color: theme.text }]}>Create Account</Text>
-              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-                Register for the academic platform
-              </Text>
+            {/* Segmented Top Bar: [ LOGIN ] | [ REGISTER ] */}
+            <View style={[styles.segmentedBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+              <TouchableOpacity
+                style={styles.segmentTab}
+                onPress={() => router.push('/(auth)/login')}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: false }}
+              >
+                <Text style={[styles.segmentText, { color: theme.textSecondary }]}>LOGIN</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.segmentTab, styles.segmentTabActive, { backgroundColor: theme.card }]}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: true }}
+              >
+                <Text style={[styles.segmentText, styles.segmentTextActive, { color: theme.primary }]}>
+                  REGISTER
+                </Text>
+              </TouchableOpacity>
             </View>
 
-            {error && (
-              <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
-                <Text style={[styles.errorText, { color: theme.error }]}>{error}</Text>
-              </View>
-            )}
-
+            {/* Sign Up Form Container */}
             <View style={[styles.formCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={styles.header}>
+                <Text style={[styles.title, { color: theme.text }]}>Sign Up</Text>
+                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                  Create your academic profile
+                </Text>
+              </View>
+
+              {displayError && (
+                <View style={[styles.errorBox, { backgroundColor: theme.error + '15', borderColor: theme.error }]}>
+                  <Text style={[styles.errorText, { color: theme.error }]}>{displayError}</Text>
+                </View>
+              )}
+
+              {/* Role Selection */}
               <Text style={[styles.label, { color: theme.textSecondary }]}>Account Role</Text>
               <View style={styles.roleSelector}>
                 <TouchableOpacity
@@ -178,13 +222,40 @@ export default function RegisterScreen() {
               />
 
               <Text style={[styles.label, { color: theme.textSecondary }]}>Password</Text>
+              <View style={styles.passwordWrapper}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.passwordInput,
+                    { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border },
+                  ]}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="At least 6 characters"
+                  placeholderTextColor={theme.textMuted}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeBtn}
+                  onPress={() => setShowPassword(!showPassword)}
+                  accessibilityRole="button"
+                >
+                  <Feather
+                    name={showPassword ? 'eye-off' : 'eye'}
+                    size={18}
+                    color={theme.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Confirm Password</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: theme.inputBg, color: theme.text, borderColor: theme.border }]}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="At least 6 characters"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Re-enter password"
                 placeholderTextColor={theme.textMuted}
-                secureTextEntry
+                secureTextEntry={!showPassword}
               />
 
               {role === 'STUDENT' && (
@@ -209,6 +280,27 @@ export default function RegisterScreen() {
                 </>
               )}
 
+              {/* Terms of Service Checkbox */}
+              <TouchableOpacity
+                style={styles.termsRow}
+                onPress={() => setAgreedToTerms(!agreedToTerms)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: agreedToTerms }}
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    { borderColor: agreedToTerms ? theme.primary : theme.border },
+                    agreedToTerms && { backgroundColor: theme.primary },
+                  ]}
+                >
+                  {agreedToTerms && <Feather name="check" size={14} color="#FFFFFF" />}
+                </View>
+                <Text style={[styles.termsText, { color: theme.textSecondary }]}>
+                  I agree to the <Text style={{ color: theme.primary, fontWeight: '600' }}>Terms & Academic Integrity</Text>
+                </Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={[
                   styles.submitBtn,
@@ -224,21 +316,8 @@ export default function RegisterScreen() {
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" size="small" />
                 ) : (
-                  <Text style={styles.submitBtnText}>Create Account</Text>
+                  <Text style={styles.submitBtnText}>CREATE ACCOUNT</Text>
                 )}
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.footerRow}>
-              <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-                Already registered?{' '}
-              </Text>
-              <TouchableOpacity
-                onPress={() => router.push('/(auth)/login')}
-                accessibilityRole="link"
-                style={styles.linkTouch}
-              >
-                <Text style={[styles.signinLink, { color: theme.primary }]}>Sign In</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -250,7 +329,7 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 24,
+    padding: 20,
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -277,21 +356,53 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   themeBtn: {
-    width: 38,
-    height: 38,
+    width: 36,
+    height: 36,
     borderRadius: 10,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
   },
+  segmentedBar: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 4,
+    marginBottom: 16,
+  },
+  segmentTab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 8,
+    cursor: 'pointer',
+  },
+  segmentTabActive: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  segmentText: {
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  segmentTextActive: {},
+  formCard: {
+    padding: 22,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
   header: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
-    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 13,
@@ -301,17 +412,12 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     borderWidth: 1,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   errorText: {
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
-  },
-  formCard: {
-    padding: 22,
-    borderRadius: 18,
-    borderWidth: 1,
   },
   label: {
     fontSize: 12,
@@ -345,6 +451,40 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 12,
   },
+  passwordWrapper: {
+    position: 'relative',
+    marginBottom: 12,
+  },
+  passwordInput: {
+    marginBottom: 0,
+    paddingRight: 44,
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: 12,
+    top: 13,
+    padding: 2,
+    cursor: 'pointer',
+  },
+  termsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 12,
+    gap: 10,
+    cursor: 'pointer',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  termsText: {
+    fontSize: 13,
+    flex: 1,
+  },
   submitBtn: {
     height: 48,
     borderRadius: 12,
@@ -359,23 +499,8 @@ const styles = StyleSheet.create({
   },
   submitBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  footerText: {
-    fontSize: 13,
-  },
-  linkTouch: {
-    cursor: 'pointer',
-  },
-  signinLink: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

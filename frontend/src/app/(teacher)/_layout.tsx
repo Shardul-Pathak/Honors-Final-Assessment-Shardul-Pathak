@@ -1,9 +1,9 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../../context/ThemeContext';
 
-// Bottom tab navigation layout for faculty and teachers
+// 5-Tab Faculty Navigation Layout matching wireframe design in Design.jpeg
 export default function TeacherTabsLayout() {
   const { theme } = useAppTheme();
 
@@ -14,7 +14,7 @@ export default function TeacherTabsLayout() {
         tabBarStyle: {
           backgroundColor: theme.tabBarBg,
           borderTopColor: theme.tabBarBorder,
-          height: 60,
+          height: 62,
           paddingBottom: 8,
           paddingTop: 8,
           maxWidth: 860,
@@ -25,7 +25,7 @@ export default function TeacherTabsLayout() {
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textMuted,
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '600',
         },
         tabBarItemStyle: {
@@ -36,9 +36,36 @@ export default function TeacherTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Leaderboard',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'podium' : 'podium-outline'} size={22} color={color} />
+            <Feather name="home" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="users"
+        options={{
+          title: 'Users',
+          tabBarIcon: ({ color, focused }) => (
+            <Feather name="users" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: 'Admin',
+          tabBarIcon: ({ color, focused }) => (
+            <Feather name="shield" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="rankings"
+        options={{
+          title: 'Rankings',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={20} color={color} />
           ),
         }}
       />
@@ -47,7 +74,7 @@ export default function TeacherTabsLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={22} color={color} />
+            <Feather name="user" size={20} color={color} />
           ),
         }}
       />

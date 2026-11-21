@@ -27,7 +27,7 @@ public class LeaderboardService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public PagedResponse<LeaderboardItemDto> getLeaderboard(int page, int size, String sortBy, String direction) {
+    public PagedResponse<LeaderboardItemDto> getLeaderboard(int page, int size, String sortBy, String direction, String department) {
         int pageNumber = Math.max(0, page);
         int pageSize = Math.min(50, Math.max(1, size));
 
@@ -42,7 +42,13 @@ public class LeaderboardService {
         );
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-        Page<StudentProfile> profilePage = studentProfileRepository.findAllWithUser(pageable);
+        Page<StudentProfile> profilePage;
+
+        if (department != null && !department.isBlank() && !"all".equalsIgnoreCase(department.trim())) {
+            profilePage = studentProfileRepository.findByDepartmentWithUser(department.trim(), pageable);
+        } else {
+            profilePage = studentProfileRepository.findAllWithUser(pageable);
+        }
 
         List<LeaderboardItemDto> items = new ArrayList<>();
         long startingRank = (long) pageNumber * pageSize + 1;
@@ -84,8 +90,7 @@ public class LeaderboardService {
                 .email(profile.getUser().getEmail())
                 .rollNumber(profile.getRollNumber())
                 .gradeLevel(profile.getGradeLevel())
-                .totalPoints(profile.getTotalPoints())
-                .lastPointsAwardedAt(profile.getLastPointsAwardedAt())
+                .totalPoints(profile.getTotalPoints() != null ? profile.getTotalPoints() : 0)
                 .build();
     }
 }

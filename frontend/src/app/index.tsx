@@ -1,70 +1,364 @@
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useAppSelector } from '../store';
+import { useAppDispatch, useAppSelector } from '../store';
 import { useAppTheme } from '../context/ThemeContext';
 import { LayoutContainer } from '../components/LayoutContainer';
+import { loginThunk } from '../store/slices/authSlice';
 
-// Splash and routing gate directing users based on active session and role
-export default function IndexScreen() {
-  const { theme } = useAppTheme();
+// Guest Home Landing Screen as designed in wireframe mockup
+export default function GuestHomeScreen() {
+  const { theme, isDark, toggleTheme } = useAppTheme();
+  const dispatch = useAppDispatch();
   const { isAuthenticated, isRestoring, user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    if (!isRestoring) {
-      if (isAuthenticated && user) {
-        if (user.role === 'TEACHER') {
-          router.replace('/(teacher)');
-        } else {
-          router.replace('/(student)');
-        }
+    if (!isRestoring && isAuthenticated && user) {
+      if (user.role === 'TEACHER') {
+        router.replace('/(teacher)');
       } else {
-        router.replace('/(auth)/login');
+        router.replace('/(student)');
       }
     }
   }, [isRestoring, isAuthenticated, user]);
 
+  const handleQuickDemo = async (role: 'STUDENT' | 'TEACHER') => {
+    const creds =
+      role === 'TEACHER'
+        ? { email: 'teacher@rbu.edu', password: 'Teacher123!' }
+        : { email: 'student@rbu.edu', password: 'Student123!' };
+    const res = await dispatch(loginThunk(creds));
+    if (loginThunk.fulfilled.match(res)) {
+      if (res.payload.user.role === 'TEACHER') {
+        router.replace('/(teacher)');
+      } else {
+        router.replace('/(student)');
+      }
+    }
+  };
+
   return (
     <LayoutContainer>
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={[styles.logoCircle, { backgroundColor: theme.primaryLight }]}>
-          <Ionicons name="school-outline" size={40} color={theme.primary} />
+      {/* Top Navigation Header */}
+      <View style={[styles.topNav, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+        <View style={styles.navBrand}>
+          <View style={[styles.navLogoBox, { backgroundColor: theme.primaryLight }]}>
+            <Ionicons name="school-outline" size={20} color={theme.primary} />
+          </View>
+          <Text style={[styles.navTitle, { color: theme.text }]}>EduRank LMS</Text>
         </View>
-        <Text style={[styles.brandTitle, { color: theme.text }]}>EduRank LMS</Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Student Management & Leaderboard</Text>
-        <ActivityIndicator size="large" color={theme.primary} style={styles.loader} />
+
+        <TouchableOpacity
+          onPress={toggleTheme}
+          style={[styles.themeBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+          accessibilityLabel="Toggle Day or Night Mode"
+          accessibilityRole="button"
+        >
+          <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
+        </TouchableOpacity>
       </View>
+
+      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
+        {/* Welcome Hero Banner */}
+        <View style={[styles.welcomeCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.welcomeHeading, { color: theme.text }]}>Welcome</Text>
+
+          <View style={[styles.appLogoBox, { backgroundColor: theme.primaryLight }]}>
+            <Ionicons name="school" size={48} color={theme.primary} />
+            <Text style={[styles.appLogoText, { color: theme.primary }]}>EduRank</Text>
+          </View>
+
+          <Text style={[styles.welcomeSubtitle, { color: theme.textSecondary }]}>
+            Your College Academic Performance & Real-Time Student Leaderboard Platform
+          </Text>
+
+          <View style={styles.getStartedBlock}>
+            <Text style={[styles.getStartedLabel, { color: theme.textMuted }]}>Get Started</Text>
+            <View style={styles.btnRow}>
+              <TouchableOpacity
+                style={[styles.actionBtn, styles.loginBtn, { backgroundColor: theme.primary }]}
+                onPress={() => router.push('/(auth)/login')}
+                accessibilityRole="button"
+              >
+                <Text style={styles.loginBtnText}>Login</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.actionBtn,
+                  styles.registerBtn,
+                  { backgroundColor: theme.surface, borderColor: theme.border },
+                ]}
+                onPress={() => router.push('/(auth)/register')}
+                accessibilityRole="button"
+              >
+                <Text style={[styles.registerBtnText, { color: theme.text }]}>Register</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Feature Highlights Section */}
+        <View style={styles.sectionBlock}>
+          <Text style={[styles.sectionHeading, { color: theme.text }]}>Feature Highlights</Text>
+
+          <View style={styles.featuresGrid}>
+            {/* Card 1 */}
+            <View style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={[styles.featureIconCircle, { backgroundColor: theme.primaryLight }]}>
+                <Feather name="user" size={20} color={theme.primary} />
+              </View>
+              <Text style={[styles.featureTitle, { color: theme.text }]}>Manage Profile</Text>
+              <Text style={[styles.featureDesc, { color: theme.textSecondary }]}>
+                Comprehensive academic records, department credentials & settings.
+              </Text>
+            </View>
+
+            {/* Card 2 */}
+            <View style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={[styles.featureIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="trophy-outline" size={20} color="#B45309" />
+              </View>
+              <Text style={[styles.featureTitle, { color: theme.text }]}>View Rankings</Text>
+              <Text style={[styles.featureDesc, { color: theme.textSecondary }]}>
+                Live class scoreboard with real-time points tracking and tie-breaking.
+              </Text>
+            </View>
+
+            {/* Card 3 */}
+            <View style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={[styles.featureIconCircle, { backgroundColor: theme.accentLight }]}>
+                <Ionicons name="star-outline" size={20} color={theme.accent} />
+              </View>
+              <Text style={[styles.featureTitle, { color: theme.text }]}>Point Allocation</Text>
+              <Text style={[styles.featureDesc, { color: theme.textSecondary }]}>
+                Faculty point distribution with reasons, category chips & audit logs.
+              </Text>
+            </View>
+
+            {/* Card 4 */}
+            <View style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={[styles.featureIconCircle, { backgroundColor: '#EFF6FF' }]}>
+                <Feather name="trending-up" size={20} color="#2563EB" />
+              </View>
+              <Text style={[styles.featureTitle, { color: theme.text }]}>Growth Analytics</Text>
+              <Text style={[styles.featureDesc, { color: theme.textSecondary }]}>
+                Class percentile distribution, departmental filtering & audit trail.
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Quick Demo Access Bar */}
+        <View style={[styles.demoCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.demoTitle, { color: theme.text }]}>Quick Demo Access</Text>
+          <Text style={[styles.demoSub, { color: theme.textSecondary }]}>
+            Experience both authenticated user roles with 1 click:
+          </Text>
+          <View style={styles.demoBtnRow}>
+            <TouchableOpacity
+              style={[styles.demoBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={() => handleQuickDemo('STUDENT')}
+              accessibilityRole="button"
+            >
+              <Ionicons name="school-outline" size={16} color={theme.accent} style={{ marginRight: 6 }} />
+              <Text style={[styles.demoBtnText, { color: theme.text }]}>Demo Student</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.demoBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={() => handleQuickDemo('TEACHER')}
+              accessibilityRole="button"
+            >
+              <Ionicons name="briefcase-outline" size={16} color={theme.primary} style={{ marginRight: 6 }} />
+              <Text style={[styles.demoBtnText, { color: theme.text }]}>Demo Faculty</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </LayoutContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  topNav: {
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  navBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  navLogoBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
   },
-  logoCircle: {
-    width: 80,
-    height: 80,
+  navTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  themeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  container: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  welcomeCard: {
+    padding: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  welcomeHeading: {
+    fontSize: 26,
+    fontWeight: '800',
+    marginBottom: 16,
+  },
+  appLogoBox: {
+    width: 90,
+    height: 90,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
-  brandTitle: {
-    fontSize: 24,
+  appLogoText: {
+    fontSize: 11,
     fontWeight: '800',
-    letterSpacing: -0.5,
+    marginTop: 2,
+    textTransform: 'uppercase',
   },
-  subtitle: {
+  welcomeSubtitle: {
     fontSize: 14,
-    marginTop: 6,
-    marginBottom: 28,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+    maxWidth: 420,
   },
-  loader: {
-    marginTop: 12,
+  getStartedBlock: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  getStartedLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+  },
+  btnRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+    maxWidth: 360,
+  },
+  actionBtn: {
+    flex: 1,
+    height: 46,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  loginBtn: {},
+  loginBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  registerBtn: {
+    borderWidth: 1,
+  },
+  registerBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  sectionBlock: {
+    marginBottom: 20,
+  },
+  sectionHeading: {
+    fontSize: 17,
+    fontWeight: '800',
+    marginBottom: 12,
+    marginLeft: 4,
+  },
+  featuresGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  featureCard: {
+    flex: 1,
+    minWidth: 160,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  featureIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  featureTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  featureDesc: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  demoCard: {
+    padding: 18,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  demoTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  demoSub: {
+    fontSize: 12,
+    marginBottom: 12,
+  },
+  demoBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  demoBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    cursor: 'pointer',
+  },
+  demoBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

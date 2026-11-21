@@ -11,6 +11,9 @@ export interface User {
   rollNumber?: string;
   totalPoints?: number;
   gradeLevel?: string;
+  phoneNumber?: string;
+  createdAt?: string;
+  status?: string;
 }
 
 export interface AuthState {
@@ -58,6 +61,21 @@ export const registerThunk = createAsyncThunk(
       return { token, user };
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || 'Registration failed';
+      return rejectWithValue(message);
+    }
+  }
+);
+
+export const updateProfileThunk = createAsyncThunk(
+  'auth/updateProfile',
+  async (payload: { fullName: string; phoneNumber?: string }, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/users/profile', payload);
+      const user = response.data;
+      await AsyncStorage.setItem('auth_user', JSON.stringify(user));
+      return user;
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || 'Profile update failed';
       return rejectWithValue(message);
     }
   }
@@ -138,6 +156,12 @@ const authSlice = createSlice({
       .addCase(registerThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      // Update Profile
+      .addCase(updateProfileThunk.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user = { ...state.user, ...action.payload };
+        }
       })
       // Restore Session
       .addCase(restoreSessionThunk.fulfilled, (state, action) => {

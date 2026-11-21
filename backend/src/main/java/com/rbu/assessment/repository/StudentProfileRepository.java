@@ -24,8 +24,18 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
            countQuery = "SELECT count(sp) FROM StudentProfile sp")
     Page<StudentProfile> findAllWithUser(Pageable pageable);
 
+    @Query(value = "SELECT sp FROM StudentProfile sp JOIN FETCH sp.user u WHERE LOWER(sp.gradeLevel) = LOWER(:department)",
+           countQuery = "SELECT count(sp) FROM StudentProfile sp WHERE LOWER(sp.gradeLevel) = LOWER(:department)")
+    Page<StudentProfile> findByDepartmentWithUser(@Param("department") String department, Pageable pageable);
+
     // Deterministic ranking computation: count students with higher points or prior timestamps
     @Query("SELECT COUNT(sp) + 1 FROM StudentProfile sp WHERE sp.totalPoints > :points " +
            "OR (sp.totalPoints = :points AND sp.id < :profileId)")
     long calculateRank(@Param("points") Integer points, @Param("profileId") UUID profileId);
+
+    @Query("SELECT COALESCE(MAX(sp.totalPoints), 0) FROM StudentProfile sp")
+    int findMaxPoints();
+
+    @Query("SELECT COALESCE(AVG(sp.totalPoints), 0) FROM StudentProfile sp")
+    double findAvgPoints();
 }

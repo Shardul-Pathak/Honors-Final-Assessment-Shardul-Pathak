@@ -51,8 +51,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/error").permitAll()
-                .requestMatchers("/api/v1/points/**").hasRole("TEACHER")
+                .requestMatchers("/api/v1/points/award").hasRole("TEACHER")
+                .requestMatchers("/api/v1/points/**").authenticated()
                 .requestMatchers("/api/v1/leaderboard/**").authenticated()
+                .requestMatchers("/api/v1/users/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

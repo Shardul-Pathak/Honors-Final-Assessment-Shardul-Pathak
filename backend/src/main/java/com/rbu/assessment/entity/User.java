@@ -35,6 +35,9 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(length = 25)
+    private String phoneNumber;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentProfile studentProfile;
 

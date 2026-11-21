@@ -2,6 +2,7 @@ package com.rbu.assessment.service;
 
 import com.rbu.assessment.dto.AwardPointsRequest;
 import com.rbu.assessment.dto.AwardPointsResponse;
+import com.rbu.assessment.dto.OverviewStatsDto;
 import com.rbu.assessment.dto.PointTransactionDto;
 import com.rbu.assessment.entity.PointTransaction;
 import com.rbu.assessment.entity.Role;
@@ -13,6 +14,7 @@ import com.rbu.assessment.repository.PointTransactionRepository;
 import com.rbu.assessment.repository.StudentProfileRepository;
 import com.rbu.assessment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,13 +76,54 @@ public class PointService {
     @Transactional(readOnly = true)
     public List<PointTransactionDto> getStudentHistory(UUID studentProfileId) {
         return pointTransactionRepository.findByStudentProfileIdOrderByCreatedAtDesc(studentProfileId).stream()
-                .map(tx -> PointTransactionDto.builder()
-                        .id(tx.getId())
-                        .pointsDelta(tx.getPointsDelta())
-                        .reason(tx.getReason())
-                        .awardedByName(tx.getAwardedBy().getFullName())
-                        .createdAt(tx.getCreatedAt())
-                        .build())
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PointTransactionDto> getMyHistory(String email) {
+        User user = userRepository.findByEmail(email.toLowerCase())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+
+        StudentProfile profile = studentProfileRepository.findByUser(user)
+                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for user: " + email));
+
+        return getStudentHistory(profile.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PointTransactionDto> getRecentTransactions(int limit) {
+        int boundedLimit = Math.min(50, Math.max(1, limit));
+        return pointTransactionRepository.findRecentWithDetails(PageRequest.of(0, boundedLimit)).stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public OverviewStatsDto getOverviewStats() {
+        long totalStudents = studentProfileRepository.count();
+        long totalPointsDistributed = pointTransactionRepository.sumAllPointsDelta();
+        int topScore = studentProfileRepository.findMaxPoints();
+        int avgScore = (int) Math.round(studentProfileRepository.findAvgPoints());
+
+        return OverviewStatsDto.builder()
+                .totalStudents(totalStudents)
+                .totalPointsDistributed(totalPointsDistributed)
+                .topScore(topScore)
+                .avgScore(avgScore)
+                .build();
+    }
+
+    private PointTransactionDto mapToDto(PointTransaction tx) {
+        return PointTransactionDto.builder()
+                .id(tx.getId())
+                .pointsDelta(tx.getPointsDelta())
+                .reason(tx.getReason())
+                .awardedByName(tx.getAwardedBy() != null ? tx.getAwardedBy().getFullName() : "Faculty")
+                .studentName(tx.getStudentProfile() != null && tx.getStudentProfile().getUser() != null ? tx.getStudentProfile().getUser().getFullName() : "Student")
+                .studentRollNumber(tx.getStudentProfile() != null ? tx.getStudentProfile().getRollNumber() : null)
+                .studentProfileId(tx.getStudentProfile() != null ? tx.getStudentProfile().getId() : null)
+                .createdAt(tx.getCreatedAt())
+                .build();
     }
 }

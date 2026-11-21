@@ -1,55 +1,108 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
-  RefreshControl,
+  TouchableOpacity,
   ScrollView,
+  RefreshControl,
+  ActivityIndicator,
+  Modal,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { fetchLeaderboardThunk, fetchMyRankThunk } from '../../store/slices/leaderboardSlice';
+import { fetchMyRankThunk, fetchMyHistoryThunk } from '../../store/slices/leaderboardSlice';
 import { useAppTheme } from '../../context/ThemeContext';
 import { LayoutContainer } from '../../components/LayoutContainer';
-import { Header } from '../../components/Header';
-import { RankCard } from '../../components/RankCard';
-import { PaginationBar } from '../../components/PaginationBar';
 
-// Student leaderboard view displaying real-time ranks, podium standings, and personal metrics
-export default function StudentLeaderboardScreen() {
-  const { theme } = useAppTheme();
+// User Home (Student Home) screen strictly matching Design.jpeg
+export default function StudentHomeScreen() {
+  const { theme, isDark, toggleTheme } = useAppTheme();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const {
-    students,
-    page,
-    totalPages,
-    totalElements,
-    myRank,
-    isLoading,
-  } = useAppSelector((state) => state.leaderboard);
+  const { myRank, myHistory, isLoading } = useAppSelector((state) => state.leaderboard);
+
+  const [supportModalVisible, setSupportModalVisible] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: '1',
+      title: 'Performance Award Received',
+      detail: '+25 points awarded for active lab participation',
+      time: '15m ago',
+      icon: 'star',
+    },
+    {
+      id: '2',
+      title: 'Department Standings Updated',
+      detail: 'Midterm class evaluations synced to live leaderboard',
+      time: '2h ago',
+      icon: 'trending-up',
+    },
+    {
+      id: '3',
+      title: 'Academic Notice',
+      detail: 'Term Fall 2026 cutoff scheduled for next Friday',
+      time: '1d ago',
+      icon: 'info',
+    },
+  ]);
 
   useEffect(() => {
-    dispatch(fetchLeaderboardThunk({ page: 0, size: 10 }));
     dispatch(fetchMyRankThunk());
+    dispatch(fetchMyHistoryThunk());
   }, [dispatch]);
 
-  const handlePageChange = (newPage: number) => {
-    dispatch(fetchLeaderboardThunk({ page: newPage, size: 10 }));
-  };
-
   const handleRefresh = () => {
-    dispatch(fetchLeaderboardThunk({ page, size: 10 }));
     dispatch(fetchMyRankThunk());
+    dispatch(fetchMyHistoryThunk());
   };
 
-  // Top 3 Podium Students
-  const topThree = students.slice(0, 3);
+  const getInitials = (name?: string) => {
+    if (!name) return 'ST';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  };
+
+  const dismissNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
 
   return (
     <LayoutContainer>
-      <Header title="Student Leaderboard" subtitle="Academic Standings" />
+      {/* Top Header: Welcome, [User Name]! + Settings/Theme Icon */}
+      <View style={[styles.headerBar, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+        <View style={styles.headerLeft}>
+          <Text style={[styles.welcomeSub, { color: theme.textSecondary }]}>Student Portal</Text>
+          <Text style={[styles.welcomeTitle, { color: theme.text }]} numberOfLines={1}>
+            Welcome, {user?.fullName || 'Student'}!
+          </Text>
+        </View>
+
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={[styles.headerIconBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+            onPress={toggleTheme}
+            accessibilityRole="button"
+            accessibilityLabel="Toggle Theme"
+          >
+            <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.headerIconBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
+            onPress={() => router.push('/(student)/profile')}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+          >
+            <Feather name="settings" size={18} color={theme.text} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <ScrollView
         contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
@@ -57,263 +110,478 @@ export default function StudentLeaderboardScreen() {
           <RefreshControl refreshing={isLoading} onRefresh={handleRefresh} tintColor={theme.primary} />
         }
       >
-        {/* Student's Personal Rank Highlight Card */}
-        {myRank && (
-          <View style={[styles.heroCard, { backgroundColor: theme.primary, borderColor: theme.primaryDark }]}>
-            <View style={styles.heroLeft}>
-              <Text style={styles.heroPretitle}>YOUR STANDING</Text>
-              <Text style={styles.heroTitle}>{user?.fullName}</Text>
-              <Text style={styles.heroSub}>
-                Roll No: {myRank.rollNumber || user?.rollNumber || 'RBU-2026'}
+        {/* Profile Card */}
+        <View style={[styles.profileCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={styles.profileRow}>
+            <View style={[styles.avatarCircle, { backgroundColor: theme.primaryLight }]}>
+              <Text style={[styles.avatarText, { color: theme.primary }]}>
+                {getInitials(user?.fullName)}
               </Text>
             </View>
 
-            <View style={styles.heroRight}>
-              <View style={styles.heroRankBadge}>
-                <Text style={styles.heroRankNumber}>#{myRank.rank}</Text>
-                <Text style={styles.heroRankLabel}>Current Rank</Text>
-              </View>
-              <View style={styles.heroPointsPill}>
-                <Ionicons name="star" size={13} color="#FFFFFF" style={{ marginRight: 4 }} />
-                <Text style={styles.heroPointsText}>{myRank.totalPoints} pts</Text>
-              </View>
+            <View style={styles.profileDetails}>
+              <Text style={[styles.userName, { color: theme.text }]}>{user?.fullName}</Text>
+              <Text style={[styles.joinedDate, { color: theme.textSecondary }]}>
+                Joined: Jan 1, 2024 • Active
+              </Text>
+              <Text style={[styles.userMeta, { color: theme.textMuted }]}>
+                Roll: {user?.rollNumber || myRank?.rollNumber || 'RBU-2026-001'} • {user?.gradeLevel || 'Computer Science'}
+              </Text>
+            </View>
+
+            <View style={[styles.rankPill, { backgroundColor: theme.primaryLight }]}>
+              <Text style={[styles.rankPillNum, { color: theme.primary }]}>
+                #{myRank?.rank ? myRank.rank : '1'}
+              </Text>
+              <Text style={[styles.rankPillLabel, { color: theme.primary }]}>Rank</Text>
             </View>
           </View>
-        )}
-
-        {/* Podium Highlight */}
-        {page === 0 && topThree.length >= 3 && (
-          <View style={[styles.podiumContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Top Performers</Text>
-
-            <View style={styles.podiumRow}>
-              {/* 2nd Place */}
-              <View style={[styles.podiumCol, styles.podiumCol2]}>
-                <View style={[styles.podiumAvatar, { backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }]}>
-                  <Ionicons name="medal-outline" size={22} color="#64748B" />
-                </View>
-                <Text style={[styles.podiumName, { color: theme.text }]} numberOfLines={1}>
-                  {topThree[1].fullName}
-                </Text>
-                <Text style={[styles.podiumScore, { color: theme.textSecondary }]}>
-                  {topThree[1].totalPoints} pts
-                </Text>
-                <View style={[styles.podiumBlock, { height: 60, backgroundColor: '#E2E8F0' }]}>
-                  <Text style={styles.podiumPlaceText}>2</Text>
-                </View>
-              </View>
-
-              {/* 1st Place */}
-              <View style={[styles.podiumCol, styles.podiumCol1]}>
-                <View style={[styles.podiumAvatar, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}>
-                  <Ionicons name="trophy" size={24} color="#D97706" />
-                </View>
-                <Text style={[styles.podiumName, { color: theme.text }]} numberOfLines={1}>
-                  {topThree[0].fullName}
-                </Text>
-                <Text style={[styles.podiumScore, { color: '#B45309', fontWeight: '700' }]}>
-                  {topThree[0].totalPoints} pts
-                </Text>
-                <View style={[styles.podiumBlock, { height: 85, backgroundColor: '#FCD34D' }]}>
-                  <Text style={[styles.podiumPlaceText, { color: '#78350F' }]}>1</Text>
-                </View>
-              </View>
-
-              {/* 3rd Place */}
-              <View style={[styles.podiumCol, styles.podiumCol3]}>
-                <View style={[styles.podiumAvatar, { backgroundColor: '#FFEDD5', borderColor: '#FED7AA' }]}>
-                  <Ionicons name="medal-outline" size={20} color="#C2410C" />
-                </View>
-                <Text style={[styles.podiumName, { color: theme.text }]} numberOfLines={1}>
-                  {topThree[2].fullName}
-                </Text>
-                <Text style={[styles.podiumScore, { color: theme.textSecondary }]}>
-                  {topThree[2].totalPoints} pts
-                </Text>
-                <View style={[styles.podiumBlock, { height: 45, backgroundColor: '#FDBA74' }]}>
-                  <Text style={styles.podiumPlaceText}>3</Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        )}
-
-        <View style={styles.listHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Full Rankings</Text>
-          <Text style={[styles.pageInfo, { color: theme.textSecondary }]}>
-            Page {totalPages === 0 ? 0 : page + 1} of {totalPages}
-          </Text>
         </View>
 
-        {isLoading && students.length === 0 ? (
-          <ActivityIndicator size="large" color={theme.primary} style={{ marginVertical: 40 }} />
-        ) : (
-          <View style={styles.listWrapper}>
-            {students.map((student) => (
-              <RankCard
-                key={student.studentProfileId}
-                item={student}
-                isCurrentUser={
-                  student.userId === user?.id ||
-                  student.studentProfileId === user?.studentProfileId
-                }
-              />
-            ))}
-          </View>
-        )}
+        {/* Quick Actions (3 buttons: My Profile, Rankings, Support) */}
+        <View style={styles.quickActionsBlock}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Quick Actions</Text>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+              onPress={() => router.push('/(student)/profile')}
+              accessibilityRole="button"
+            >
+              <View style={[styles.actionIconCircle, { backgroundColor: theme.primaryLight }]}>
+                <Feather name="user" size={20} color={theme.primary} />
+              </View>
+              <Text style={[styles.actionLabel, { color: theme.text }]}>My Profile</Text>
+            </TouchableOpacity>
 
-        <PaginationBar
-          page={page}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          onPageChange={handlePageChange}
-        />
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+              onPress={() => router.push('/(student)/rankings')}
+              accessibilityRole="button"
+            >
+              <View style={[styles.actionIconCircle, { backgroundColor: '#FEF3C7' }]}>
+                <Ionicons name="trophy-outline" size={20} color="#B45309" />
+              </View>
+              <Text style={[styles.actionLabel, { color: theme.text }]}>Rankings</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+              onPress={() => setSupportModalVisible(true)}
+              accessibilityRole="button"
+            >
+              <View style={[styles.actionIconCircle, { backgroundColor: theme.accentLight }]}>
+                <Feather name="help-circle" size={20} color={theme.accent} />
+              </View>
+              <Text style={[styles.actionLabel, { color: theme.text }]}>Support</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Notifications Feed */}
+        <View style={styles.sectionWrapper}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Notifications Feed</Text>
+            <Text style={[styles.badgeCount, { color: theme.textMuted }]}>{notifications.length} alerts</Text>
+          </View>
+
+          {notifications.map((notif) => (
+            <View
+              key={notif.id}
+              style={[styles.notifCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+            >
+              <View style={[styles.notifIcon, { backgroundColor: theme.surface }]}>
+                <Feather name="bell" size={16} color={theme.primary} />
+              </View>
+              <View style={styles.notifContent}>
+                <Text style={[styles.notifTitle, { color: theme.text }]}>{notif.title}</Text>
+                <Text style={[styles.notifDetail, { color: theme.textSecondary }]}>
+                  {notif.detail}
+                </Text>
+              </View>
+              <View style={styles.notifRight}>
+                <Text style={[styles.notifTime, { color: theme.textMuted }]}>{notif.time}</Text>
+                <TouchableOpacity
+                  onPress={() => dismissNotification(notif.id)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                >
+                  <Feather name="x" size={14} color={theme.textMuted} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Recent Activity (Live point transactions) */}
+        <View style={styles.sectionWrapper}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent Activity</Text>
+            <TouchableOpacity onPress={() => router.push('/(student)/activity')} accessibilityRole="link">
+              <Text style={[styles.viewAllLink, { color: theme.primary }]}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
+          {myHistory.length === 0 ? (
+            <View style={[styles.emptyBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Feather name="clock" size={24} color={theme.textMuted} style={{ marginBottom: 6 }} />
+              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+                No recent activity records found.
+              </Text>
+            </View>
+          ) : (
+            myHistory.slice(0, 4).map((tx) => (
+              <View
+                key={tx.id}
+                style={[styles.activityCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+              >
+                <View style={[styles.activityIcon, { backgroundColor: theme.accentLight }]}>
+                  <Feather name="clock" size={16} color={theme.accent} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={[styles.activityReason, { color: theme.text }]}>{tx.reason}</Text>
+                  <Text style={[styles.activityBy, { color: theme.textSecondary }]}>
+                    Awarded by: {tx.awardedByName}
+                  </Text>
+                </View>
+                <View style={styles.activityDeltaBlock}>
+                  <Text
+                    style={[
+                      styles.activityDelta,
+                      { color: tx.pointsDelta >= 0 ? theme.accent : theme.error },
+                    ]}
+                  >
+                    {tx.pointsDelta > 0 ? `+${tx.pointsDelta}` : tx.pointsDelta} pts
+                  </Text>
+                  <Text style={[styles.activityDate, { color: theme.textMuted }]}>
+                    {new Date(tx.createdAt).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
       </ScrollView>
+
+      {/* Academic Support Modal */}
+      <Modal visible={supportModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>Academic Support & Help</Text>
+              <TouchableOpacity
+                onPress={() => setSupportModalVisible(false)}
+                accessibilityRole="button"
+                style={{ cursor: 'pointer' }}
+              >
+                <Feather name="x" size={20} color={theme.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.modalDesc, { color: theme.textSecondary }]}>
+              Reach out to department advisors or IT coordinators for performance inquiries:
+            </Text>
+
+            <View style={[styles.contactCard, { backgroundColor: theme.surface }]}>
+              <Feather name="mail" size={16} color={theme.primary} style={{ marginRight: 8 }} />
+              <Text style={[styles.contactText, { color: theme.text }]}>support@rbu.edu</Text>
+            </View>
+
+            <View style={[styles.contactCard, { backgroundColor: theme.surface }]}>
+              <Feather name="phone" size={16} color={theme.accent} style={{ marginRight: 8 }} />
+              <Text style={[styles.contactText, { color: theme.text }]}>+91 712 2580011</Text>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.closeModalBtn, { backgroundColor: theme.primary }]}
+              onPress={() => setSupportModalVisible(false)}
+              accessibilityRole="button"
+            >
+              <Text style={styles.closeModalText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </LayoutContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    paddingBottom: 28,
-  },
-  heroCard: {
-    padding: 20,
-    borderRadius: 18,
-    borderWidth: 1,
+  headerBar: {
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 3,
+    justifyContent: 'space-between',
   },
-  heroLeft: {
+  headerLeft: {
     flex: 1,
   },
-  heroPretitle: {
-    color: 'rgba(255, 255, 255, 0.75)',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
+  welcomeSub: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  heroTitle: {
-    color: '#FFFFFF',
-    fontSize: 20,
+  welcomeTitle: {
+    fontSize: 18,
     fontWeight: '800',
     marginTop: 2,
   },
-  heroSub: {
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  heroRight: {
-    alignItems: 'flex-end',
-    gap: 6,
-  },
-  heroRankBadge: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  heroRankNumber: {
-    color: '#4F46E5',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  heroRankLabel: {
-    color: '#6366F1',
-    fontSize: 9,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  heroPointsPill: {
+  headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    gap: 8,
   },
-  heroPointsText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+  headerIconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
   },
-  podiumContainer: {
+  container: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  profileCard: {
     padding: 18,
     borderRadius: 18,
     borderWidth: 1,
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  podiumRow: {
+  profileRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    gap: 16,
-    paddingTop: 10,
-  },
-  podiumCol: {
-    flex: 1,
     alignItems: 'center',
   },
-  podiumCol1: {
-    zIndex: 2,
-  },
-  podiumCol2: {},
-  podiumCol3: {},
-  podiumAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
+  avatarCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginRight: 14,
   },
-  podiumName: {
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  podiumScore: {
-    fontSize: 11,
-    marginBottom: 6,
-  },
-  podiumBlock: {
-    width: '100%',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  podiumPlaceText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+  avatarText: {
+    fontSize: 20,
     fontWeight: '800',
   },
-  listHeader: {
+  profileDetails: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  joinedDate: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  userMeta: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  rankPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  rankPillNum: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  rankPillLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  quickActionsBlock: {
+    marginBottom: 18,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 10,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  actionCard: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    cursor: 'pointer',
+  },
+  actionIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  sectionWrapper: {
+    marginBottom: 18,
+  },
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
   },
-  pageInfo: {
+  badgeCount: {
     fontSize: 12,
-    fontWeight: '500',
   },
-  listWrapper: {
+  viewAllLink: {
+    fontSize: 12,
+    fontWeight: '700',
+    cursor: 'pointer',
+  },
+  notifCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
     marginBottom: 8,
+  },
+  notifIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  notifContent: {
+    flex: 1,
+  },
+  notifTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  notifDetail: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  notifRight: {
+    alignItems: 'flex-end',
+    gap: 4,
+    marginLeft: 8,
+  },
+  notifTime: {
+    fontSize: 10,
+  },
+  emptyBox: {
+    padding: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 13,
+  },
+  activityCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  activityIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  activityContent: {
+    flex: 1,
+  },
+  activityReason: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  activityBy: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  activityDeltaBlock: {
+    alignItems: 'flex-end',
+    marginLeft: 8,
+  },
+  activityDelta: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  activityDate: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalBox: {
+    width: '100%',
+    maxWidth: 420,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 22,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  modalDesc: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  contactCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  contactText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  closeModalBtn: {
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    cursor: 'pointer',
+  },
+  closeModalText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

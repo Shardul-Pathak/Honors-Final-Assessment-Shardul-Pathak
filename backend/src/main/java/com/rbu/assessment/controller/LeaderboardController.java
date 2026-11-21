@@ -22,8 +22,9 @@ public class LeaderboardController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "totalPoints") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
-        PagedResponse<LeaderboardItemDto> response = leaderboardService.getLeaderboard(page, size, sortBy, direction);
+            @RequestParam(defaultValue = "desc") String direction,
+            @RequestParam(required = false) String department) {
+        PagedResponse<LeaderboardItemDto> response = leaderboardService.getLeaderboard(page, size, sortBy, direction, department);
         return ResponseEntity.ok(response);
     }
 

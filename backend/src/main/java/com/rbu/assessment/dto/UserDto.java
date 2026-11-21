@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.UUID;
 
 // Data transfer object representing the authenticated user's profile
@@ -22,4 +23,7 @@ public class UserDto {
     private String rollNumber;
     private Integer totalPoints;
     private String gradeLevel;
+    private String phoneNumber;
+    private Instant createdAt;
+    private String status;
 }

@@ -18,5 +18,8 @@ public class PointTransactionDto {
     private Integer pointsDelta;
     private String reason;
     private String awardedByName;
+    private String studentName;
+    private String studentRollNumber;
+    private UUID studentProfileId;
     private Instant createdAt;
 }
