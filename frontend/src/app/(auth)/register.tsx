@@ -67,7 +67,12 @@ export default function RegisterScreen() {
         >
           <View style={styles.cardWrapper}>
             <View style={styles.topBar}>
-              <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={styles.backBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+              >
                 <Feather name="arrow-left" size={18} color={theme.text} style={{ marginRight: 6 }} />
                 <Text style={[styles.backText, { color: theme.text }]}>Back</Text>
               </TouchableOpacity>
@@ -75,6 +80,7 @@ export default function RegisterScreen() {
                 onPress={toggleTheme}
                 style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
                 accessibilityLabel="Toggle Theme"
+                accessibilityRole="button"
               >
                 <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
               </TouchableOpacity>
@@ -104,6 +110,8 @@ export default function RegisterScreen() {
                       : { backgroundColor: theme.surface, borderColor: theme.border },
                   ]}
                   onPress={() => setRole('STUDENT')}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: role === 'STUDENT' }}
                 >
                   <Ionicons
                     name="school-outline"
@@ -129,6 +137,8 @@ export default function RegisterScreen() {
                       : { backgroundColor: theme.surface, borderColor: theme.border },
                   ]}
                   onPress={() => setRole('TEACHER')}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: role === 'TEACHER' }}
                 >
                   <Ionicons
                     name="briefcase-outline"
@@ -200,10 +210,16 @@ export default function RegisterScreen() {
               )}
 
               <TouchableOpacity
-                style={[styles.submitBtn, { backgroundColor: theme.primary }]}
+                style={[
+                  styles.submitBtn,
+                  { backgroundColor: theme.primary },
+                  isLoading && styles.disabledBtn,
+                ]}
                 onPress={handleRegister}
                 disabled={isLoading}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                aria-disabled={isLoading}
               >
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" size="small" />
@@ -217,7 +233,11 @@ export default function RegisterScreen() {
               <Text style={[styles.footerText, { color: theme.textSecondary }]}>
                 Already registered?{' '}
               </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+              <TouchableOpacity
+                onPress={() => router.push('/(auth)/login')}
+                accessibilityRole="link"
+                style={styles.linkTouch}
+              >
                 <Text style={[styles.signinLink, { color: theme.primary }]}>Sign In</Text>
               </TouchableOpacity>
             </View>
@@ -250,6 +270,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     paddingHorizontal: 4,
+    cursor: 'pointer',
   },
   backText: {
     fontSize: 14,
@@ -262,6 +283,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    cursor: 'pointer',
   },
   header: {
     marginBottom: 20,
@@ -309,6 +331,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    cursor: 'pointer',
   },
   roleText: {
     fontSize: 13,
@@ -328,6 +351,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
+    cursor: 'pointer',
+  },
+  disabledBtn: {
+    opacity: 0.6,
+    cursor: 'not-allowed' as any,
   },
   submitBtnText: {
     color: '#FFFFFF',
@@ -342,6 +370,9 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
+  },
+  linkTouch: {
+    cursor: 'pointer',
   },
   signinLink: {
     fontSize: 13,

@@ -42,6 +42,7 @@ export const Header: React.FC<{ title?: string; subtitle?: string }> = ({
           onPress={toggleTheme}
           style={[styles.actionButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
           accessibilityLabel="Toggle Theme"
+          accessibilityRole="button"
         >
           <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
         </TouchableOpacity>
@@ -51,6 +52,7 @@ export const Header: React.FC<{ title?: string; subtitle?: string }> = ({
             onPress={handleLogout}
             style={[styles.actionButton, styles.logoutButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
             accessibilityLabel="Sign Out"
+            accessibilityRole="button"
           >
             <Feather name="log-out" size={17} color={theme.error} />
           </TouchableOpacity>
@@ -104,6 +106,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    cursor: 'pointer',
   },
   logoutButton: {
     marginLeft: 2,

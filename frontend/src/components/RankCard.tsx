@@ -88,6 +88,7 @@ export const RankCard: React.FC<RankCardProps> = ({
             style={[styles.awardButton, { backgroundColor: theme.primary }]}
             onPress={() => onAwardPress && onAwardPress(item)}
             activeOpacity={0.8}
+            accessibilityRole="button"
           >
             <Feather name="plus" size={14} color="#FFFFFF" style={{ marginRight: 2 }} />
             <Text style={styles.awardButtonText}>Award</Text>
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
+    cursor: 'pointer',
   },
   awardButtonText: {
     color: '#FFFFFF',

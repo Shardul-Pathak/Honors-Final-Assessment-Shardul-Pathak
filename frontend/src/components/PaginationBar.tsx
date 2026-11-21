@@ -17,6 +17,8 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
   onPageChange,
 }) => {
   const { theme } = useAppTheme();
+  const isFirstPage = page === 0;
+  const isLastPage = page >= totalPages - 1 || totalPages === 0;
 
   return (
     <View style={[styles.container, { borderTopColor: theme.border, backgroundColor: theme.card }]}>
@@ -29,18 +31,21 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
           style={[
             styles.navBtn,
             { backgroundColor: theme.surface, borderColor: theme.border },
-            page === 0 && styles.disabledBtn,
+            isFirstPage && styles.disabledBtn,
           ]}
           onPress={() => onPageChange(page - 1)}
-          disabled={page === 0}
+          disabled={isFirstPage}
+          accessibilityRole="button"
+          accessibilityLabel="Previous Page"
+          aria-disabled={isFirstPage}
         >
           <Feather
             name="chevron-left"
             size={16}
-            color={page === 0 ? theme.textMuted : theme.text}
+            color={isFirstPage ? theme.textMuted : theme.text}
             style={{ marginRight: 2 }}
           />
-          <Text style={[styles.navBtnText, { color: page === 0 ? theme.textMuted : theme.text }]}>
+          <Text style={[styles.navBtnText, { color: isFirstPage ? theme.textMuted : theme.text }]}>
             Previous
           </Text>
         </TouchableOpacity>
@@ -53,15 +58,18 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
           style={[
             styles.navBtn,
             { backgroundColor: theme.surface, borderColor: theme.border },
-            (page >= totalPages - 1 || totalPages === 0) && styles.disabledBtn,
+            isLastPage && styles.disabledBtn,
           ]}
           onPress={() => onPageChange(page + 1)}
-          disabled={page >= totalPages - 1 || totalPages === 0}
+          disabled={isLastPage}
+          accessibilityRole="button"
+          accessibilityLabel="Next Page"
+          aria-disabled={isLastPage}
         >
           <Text
             style={[
               styles.navBtnText,
-              { color: page >= totalPages - 1 || totalPages === 0 ? theme.textMuted : theme.text },
+              { color: isLastPage ? theme.textMuted : theme.text },
             ]}
           >
             Next
@@ -69,7 +77,7 @@ export const PaginationBar: React.FC<PaginationBarProps> = ({
           <Feather
             name="chevron-right"
             size={16}
-            color={page >= totalPages - 1 || totalPages === 0 ? theme.textMuted : theme.text}
+            color={isLastPage ? theme.textMuted : theme.text}
             style={{ marginLeft: 2 }}
           />
         </TouchableOpacity>
@@ -103,9 +111,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
+    cursor: 'pointer',
   },
   disabledBtn: {
     opacity: 0.5,
+    cursor: 'not-allowed' as any,
   },
   navBtnText: {
     fontSize: 12,

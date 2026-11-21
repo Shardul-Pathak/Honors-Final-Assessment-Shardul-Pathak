@@ -58,6 +58,7 @@ export default function LoginScreen() {
               onPress={toggleTheme}
               style={[styles.themeBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
               accessibilityLabel="Toggle Theme"
+              accessibilityRole="button"
             >
               <Feather name={isDark ? 'sun' : 'moon'} size={18} color={theme.text} />
             </TouchableOpacity>
@@ -103,10 +104,16 @@ export default function LoginScreen() {
               />
 
               <TouchableOpacity
-                style={[styles.loginBtn, { backgroundColor: theme.primary }]}
+                style={[
+                  styles.loginBtn,
+                  { backgroundColor: theme.primary },
+                  isLoading && styles.disabledBtn,
+                ]}
                 onPress={handleLogin}
                 disabled={isLoading}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                aria-disabled={isLoading}
               >
                 {isLoading ? (
                   <ActivityIndicator color="#FFFFFF" size="small" />
@@ -120,7 +127,11 @@ export default function LoginScreen() {
               <Text style={[styles.footerText, { color: theme.textSecondary }]}>
                 Don't have an account?{' '}
               </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+              <TouchableOpacity
+                onPress={() => router.push('/(auth)/register')}
+                accessibilityRole="link"
+                style={styles.linkTouch}
+              >
                 <Text style={[styles.signupLink, { color: theme.primary }]}>Sign Up</Text>
               </TouchableOpacity>
             </View>
@@ -153,6 +164,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    cursor: 'pointer',
   },
   cardWrapper: {
     width: '100%',
@@ -219,6 +231,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 6,
+    cursor: 'pointer',
+  },
+  disabledBtn: {
+    opacity: 0.6,
+    cursor: 'not-allowed' as any,
   },
   loginBtnText: {
     color: '#FFFFFF',
@@ -233,6 +250,9 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 13,
+  },
+  linkTouch: {
+    cursor: 'pointer',
   },
   signupLink: {
     fontSize: 13,

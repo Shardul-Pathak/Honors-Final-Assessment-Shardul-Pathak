@@ -108,7 +108,13 @@ export default function TeacherLeaderboardScreen() {
               <Feather name="check-circle" size={16} color={theme.accent} style={{ marginRight: 8 }} />
               <Text style={[styles.alertText, { color: theme.accent }]}>{awardSuccessMessage}</Text>
             </View>
-            <TouchableOpacity onPress={() => dispatch(clearAwardMessage())} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity
+              onPress={() => dispatch(clearAwardMessage())}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss message"
+              style={styles.dismissBtn}
+            >
               <Feather name="x" size={16} color={theme.accent} />
             </TouchableOpacity>
           </View>
@@ -202,6 +208,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     marginRight: 8,
+  },
+  dismissBtn: {
+    padding: 4,
+    cursor: 'pointer',
   },
   alertText: {
     fontSize: 13,

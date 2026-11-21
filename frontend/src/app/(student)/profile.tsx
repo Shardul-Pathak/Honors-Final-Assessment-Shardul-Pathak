@@ -96,6 +96,7 @@ export default function StudentProfileScreen() {
               onValueChange={toggleTheme}
               thumbColor={isDark ? theme.primary : '#FFFFFF'}
               trackColor={{ false: '#E2E8F0', true: theme.primaryLight }}
+              style={{ cursor: 'pointer' } as any}
             />
           </View>
         </View>
@@ -103,6 +104,7 @@ export default function StudentProfileScreen() {
         <TouchableOpacity
           style={[styles.logoutBtn, { backgroundColor: theme.error + '15', borderColor: theme.error }]}
           onPress={handleLogout}
+          accessibilityRole="button"
         >
           <Feather name="log-out" size={18} color={theme.error} style={{ marginRight: 8 }} />
           <Text style={[styles.logoutText, { color: theme.error }]}>Sign Out</Text>
@@ -230,6 +232,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    cursor: 'pointer',
   },
   logoutText: {
     fontSize: 14,

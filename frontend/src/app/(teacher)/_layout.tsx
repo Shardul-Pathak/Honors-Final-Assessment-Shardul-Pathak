@@ -28,6 +28,9 @@ export default function TeacherTabsLayout() {
           fontSize: 12,
           fontWeight: '600',
         },
+        tabBarItemStyle: {
+          cursor: 'pointer',
+        },
       }}
     >
       <Tabs.Screen

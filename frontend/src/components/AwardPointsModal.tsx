@@ -85,7 +85,12 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
         <View style={[styles.dialog, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.header}>
             <Text style={[styles.title, { color: theme.text }]}>Award Performance Points</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+            >
               <Feather name="x" size={20} color={theme.textSecondary} />
             </TouchableOpacity>
           </View>
@@ -110,6 +115,7 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
                   },
                 ]}
                 onPress={() => handleSelectQuick(val)}
+                accessibilityRole="button"
               >
                 <Text
                   style={[
@@ -146,17 +152,29 @@ export const AwardPointsModal: React.FC<AwardPointsModalProps> = ({
 
           <View style={styles.actionRow}>
             <TouchableOpacity
-              style={[styles.button, styles.cancelBtn, { borderColor: theme.border }]}
+              style={[
+                styles.button,
+                styles.cancelBtn,
+                { borderColor: theme.border },
+                isAwarding && styles.disabledBtn,
+              ]}
               onPress={onClose}
               disabled={isAwarding}
+              accessibilityRole="button"
             >
               <Text style={[styles.btnText, { color: theme.textSecondary }]}>Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.submitBtn, { backgroundColor: theme.primary }]}
+              style={[
+                styles.button,
+                styles.submitBtn,
+                { backgroundColor: theme.primary },
+                isAwarding && styles.disabledBtn,
+              ]}
               onPress={handleSubmit}
               disabled={isAwarding}
+              accessibilityRole="button"
             >
               {isAwarding ? (
                 <ActivityIndicator color="#FFFFFF" size="small" />
@@ -203,6 +221,7 @@ const styles = StyleSheet.create({
   },
   closeBtn: {
     padding: 4,
+    cursor: 'pointer',
   },
   studentBox: {
     padding: 12,
@@ -234,6 +253,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
+    cursor: 'pointer',
   },
   chipText: {
     fontSize: 13,
@@ -264,11 +284,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     minWidth: 90,
     alignItems: 'center',
+    cursor: 'pointer',
   },
   cancelBtn: {
     borderWidth: 1,
   },
   submitBtn: {},
+  disabledBtn: {
+    opacity: 0.6,
+    cursor: 'not-allowed' as any,
+  },
   btnText: {
     fontSize: 13,
     fontWeight: '600',
