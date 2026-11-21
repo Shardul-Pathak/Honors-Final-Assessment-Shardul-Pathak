@@ -24,29 +24,6 @@ export default function StudentHomeScreen() {
   const { myRank, myHistory, isLoading } = useAppSelector((state) => state.leaderboard);
 
   const [supportModalVisible, setSupportModalVisible] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: '1',
-      title: 'Performance Award Received',
-      detail: '+25 points awarded for active lab participation',
-      time: '15m ago',
-      icon: 'star',
-    },
-    {
-      id: '2',
-      title: 'Department Standings Updated',
-      detail: 'Midterm class evaluations synced to live leaderboard',
-      time: '2h ago',
-      icon: 'trending-up',
-    },
-    {
-      id: '3',
-      title: 'Academic Notice',
-      detail: 'Term Fall 2026 cutoff scheduled for next Friday',
-      time: '1d ago',
-      icon: 'info',
-    },
-  ]);
 
   useEffect(() => {
     dispatch(fetchMyRankThunk());
@@ -66,10 +43,6 @@ export default function StudentHomeScreen() {
       .slice(0, 2)
       .join('')
       .toUpperCase();
-  };
-
-  const dismissNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   return (
@@ -175,41 +148,6 @@ export default function StudentHomeScreen() {
               <Text style={[styles.actionLabel, { color: theme.text }]}>Support</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Notifications Feed */}
-        <View style={styles.sectionWrapper}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>Notifications Feed</Text>
-            <Text style={[styles.badgeCount, { color: theme.textMuted }]}>{notifications.length} alerts</Text>
-          </View>
-
-          {notifications.map((notif) => (
-            <View
-              key={notif.id}
-              style={[styles.notifCard, { backgroundColor: theme.card, borderColor: theme.border }]}
-            >
-              <View style={[styles.notifIcon, { backgroundColor: theme.surface }]}>
-                <Feather name="bell" size={16} color={theme.primary} />
-              </View>
-              <View style={styles.notifContent}>
-                <Text style={[styles.notifTitle, { color: theme.text }]}>{notif.title}</Text>
-                <Text style={[styles.notifDetail, { color: theme.textSecondary }]}>
-                  {notif.detail}
-                </Text>
-              </View>
-              <View style={styles.notifRight}>
-                <Text style={[styles.notifTime, { color: theme.textMuted }]}>{notif.time}</Text>
-                <TouchableOpacity
-                  onPress={() => dismissNotification(notif.id)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  accessibilityRole="button"
-                >
-                  <Feather name="x" size={14} color={theme.textMuted} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
         </View>
 
         {/* Recent Activity (Live point transactions) */}
@@ -439,48 +377,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  badgeCount: {
-    fontSize: 12,
-  },
   viewAllLink: {
     fontSize: 12,
     fontWeight: '700',
     cursor: 'pointer',
-  },
-  notifCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-    marginBottom: 8,
-  },
-  notifIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  notifContent: {
-    flex: 1,
-  },
-  notifTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  notifDetail: {
-    fontSize: 11,
-    marginTop: 2,
-  },
-  notifRight: {
-    alignItems: 'flex-end',
-    gap: 4,
-    marginLeft: 8,
-  },
-  notifTime: {
-    fontSize: 10,
   },
   emptyBox: {
     padding: 20,
