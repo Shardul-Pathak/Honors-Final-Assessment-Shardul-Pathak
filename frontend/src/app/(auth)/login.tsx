@@ -9,9 +9,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Modal,
 } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { loginThunk, clearAuthError } from '../../store/slices/authSlice';
@@ -27,7 +26,6 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [forgotModalVisible, setForgotModalVisible] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -43,12 +41,6 @@ export default function LoginScreen() {
         router.replace('/(student)');
       }
     }
-  };
-
-  const handleGoogleSSO = () => {
-    // Fill demo student for instant access
-    setEmail('student@rbu.edu');
-    setPassword('Student123!');
   };
 
   return (
@@ -159,12 +151,6 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.forgotRow}>
-                <TouchableOpacity onPress={() => setForgotModalVisible(true)} accessibilityRole="link">
-                  <Text style={[styles.forgotText, { color: theme.primary }]}>Forgot Password?</Text>
-                </TouchableOpacity>
-              </View>
-
               <TouchableOpacity
                 style={[
                   styles.loginBtn,
@@ -183,53 +169,10 @@ export default function LoginScreen() {
                   <Text style={styles.loginBtnText}>LOG IN</Text>
                 )}
               </TouchableOpacity>
-
-              <View style={styles.dividerRow}>
-                <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
-                <Text style={[styles.dividerText, { color: theme.textMuted }]}>or</Text>
-                <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
-              </View>
-
-              {/* Social / Campus SSO button */}
-              <TouchableOpacity
-                style={[styles.googleBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
-                onPress={handleGoogleSSO}
-                accessibilityRole="button"
-              >
-                <Ionicons name="logo-google" size={16} color="#EA4335" style={{ marginRight: 8 }} />
-                <Text style={[styles.googleBtnText, { color: theme.text }]}>Continue with Google</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* Forgot Password Modal */}
-      <Modal visible={forgotModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Reset Password</Text>
-            <Text style={[styles.modalDesc, { color: theme.textSecondary }]}>
-              Password resets are handled by university IT administrators. Default demo credentials:
-            </Text>
-            <View style={[styles.credsBox, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.credLine, { color: theme.text }]}>
-                Student: <Text style={{ fontWeight: '700' }}>student@rbu.edu / Student123!</Text>
-              </Text>
-              <Text style={[styles.credLine, { color: theme.text }]}>
-                Teacher: <Text style={{ fontWeight: '700' }}>teacher@rbu.edu / Teacher123!</Text>
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={[styles.modalCloseBtn, { backgroundColor: theme.primary }]}
-              onPress={() => setForgotModalVisible(false)}
-              accessibilityRole="button"
-            >
-              <Text style={styles.modalCloseText}>Got It</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </LayoutContainer>
   );
 }
@@ -341,7 +284,7 @@ const styles = StyleSheet.create({
   },
   passwordWrapper: {
     position: 'relative',
-    marginBottom: 8,
+    marginBottom: 20,
   },
   passwordInput: {
     marginBottom: 0,
@@ -353,14 +296,6 @@ const styles = StyleSheet.create({
     top: 13,
     padding: 2,
     cursor: 'pointer',
-  },
-  forgotRow: {
-    alignItems: 'flex-end',
-    marginBottom: 16,
-  },
-  forgotText: {
-    fontSize: 12,
-    fontWeight: '600',
   },
   loginBtn: {
     height: 48,
@@ -378,78 +313,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     letterSpacing: 0.5,
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 16,
-    gap: 10,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    fontSize: 12,
-    fontWeight: '500',
-    textTransform: 'uppercase',
-  },
-  googleBtn: {
-    height: 46,
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  },
-  googleBtnText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalBox: {
-    width: '100%',
-    maxWidth: 400,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 8,
-  },
-  modalDesc: {
-    fontSize: 13,
-    lineHeight: 18,
-    marginBottom: 12,
-  },
-  credsBox: {
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 16,
-    gap: 4,
-  },
-  credLine: {
-    fontSize: 12,
-  },
-  modalCloseBtn: {
-    height: 44,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  },
-  modalCloseText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
   },
 });
