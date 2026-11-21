@@ -2,15 +2,13 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useAppDispatch, useAppSelector } from '../store';
+import { useAppSelector } from '../store';
 import { useAppTheme } from '../context/ThemeContext';
 import { LayoutContainer } from '../components/LayoutContainer';
-import { loginThunk } from '../store/slices/authSlice';
 
 // Guest Home Landing Screen as designed in wireframe mockup
 export default function GuestHomeScreen() {
   const { theme, isDark, toggleTheme } = useAppTheme();
-  const dispatch = useAppDispatch();
   const { isAuthenticated, isRestoring, user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
@@ -22,21 +20,6 @@ export default function GuestHomeScreen() {
       }
     }
   }, [isRestoring, isAuthenticated, user]);
-
-  const handleQuickDemo = async (role: 'STUDENT' | 'TEACHER') => {
-    const creds =
-      role === 'TEACHER'
-        ? { email: 'teacher@rbu.edu', password: 'Teacher123!' }
-        : { email: 'student@rbu.edu', password: 'Student123!' };
-    const res = await dispatch(loginThunk(creds));
-    if (loginThunk.fulfilled.match(res)) {
-      if (res.payload.user.role === 'TEACHER') {
-        router.replace('/(teacher)');
-      } else {
-        router.replace('/(student)');
-      }
-    }
-  };
 
   return (
     <LayoutContainer>
@@ -147,33 +130,6 @@ export default function GuestHomeScreen() {
                 Class percentile distribution, departmental filtering & audit trail.
               </Text>
             </View>
-          </View>
-        </View>
-
-        {/* Quick Demo Access Bar */}
-        <View style={[styles.demoCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.demoTitle, { color: theme.text }]}>Quick Demo Access</Text>
-          <Text style={[styles.demoSub, { color: theme.textSecondary }]}>
-            Experience both authenticated user roles with 1 click:
-          </Text>
-          <View style={styles.demoBtnRow}>
-            <TouchableOpacity
-              style={[styles.demoBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => handleQuickDemo('STUDENT')}
-              accessibilityRole="button"
-            >
-              <Ionicons name="school-outline" size={16} color={theme.accent} style={{ marginRight: 6 }} />
-              <Text style={[styles.demoBtnText, { color: theme.text }]}>Demo Student</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.demoBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
-              onPress={() => handleQuickDemo('TEACHER')}
-              accessibilityRole="button"
-            >
-              <Ionicons name="briefcase-outline" size={16} color={theme.primary} style={{ marginRight: 6 }} />
-              <Text style={[styles.demoBtnText, { color: theme.text }]}>Demo Faculty</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -328,37 +284,5 @@ const styles = StyleSheet.create({
   featureDesc: {
     fontSize: 12,
     lineHeight: 16,
-  },
-  demoCard: {
-    padding: 18,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  demoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  demoSub: {
-    fontSize: 12,
-    marginBottom: 12,
-  },
-  demoBtnRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  demoBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    cursor: 'pointer',
-  },
-  demoBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
   },
 });
