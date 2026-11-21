@@ -38,7 +38,7 @@ export default function TeacherAdminScreen() {
 
   return (
     <LayoutContainer>
-      <Header title="Admin Console" subtitle="System Health & Audit Trail" />
+      <Header title="Admin Console" subtitle="System Audit Trail & Metrics" />
 
       <ScrollView
         contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
@@ -46,39 +46,6 @@ export default function TeacherAdminScreen() {
           <RefreshControl refreshing={isLoading} onRefresh={handleRefresh} tintColor={theme.primary} />
         }
       >
-        {/* System Health Card */}
-        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Infrastructure Status</Text>
-
-          <View style={styles.healthRow}>
-            <View style={styles.healthLeft}>
-              <View style={[styles.dot, { backgroundColor: '#10B981' }]} />
-              <Text style={[styles.healthName, { color: theme.text }]}>Database</Text>
-            </View>
-            <Text style={[styles.healthVal, { color: theme.accent }]}>PostgreSQL 16 (Port 5433)</Text>
-          </View>
-
-          <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-          <View style={styles.healthRow}>
-            <View style={styles.healthLeft}>
-              <View style={[styles.dot, { backgroundColor: '#10B981' }]} />
-              <Text style={[styles.healthName, { color: theme.text }]}>Backend Service</Text>
-            </View>
-            <Text style={[styles.healthVal, { color: theme.accent }]}>Spring Boot 4.1.2 • Java 25</Text>
-          </View>
-
-          <View style={[styles.divider, { backgroundColor: theme.border }]} />
-
-          <View style={styles.healthRow}>
-            <View style={styles.healthLeft}>
-              <View style={[styles.dot, { backgroundColor: '#10B981' }]} />
-              <Text style={[styles.healthName, { color: theme.text }]}>Access Control</Text>
-            </View>
-            <Text style={[styles.healthVal, { color: theme.accent }]}>Spring Security 6 JWT</Text>
-          </View>
-        </View>
-
         {/* Global Stats Summary */}
         <View style={styles.statsRow}>
           <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
@@ -165,33 +132,6 @@ const styles = StyleSheet.create({
   cardSub: {
     fontSize: 12,
     marginBottom: 14,
-  },
-  healthRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  healthLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  healthName: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  healthVal: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  divider: {
-    height: 1,
   },
   statsRow: {
     flexDirection: 'row',

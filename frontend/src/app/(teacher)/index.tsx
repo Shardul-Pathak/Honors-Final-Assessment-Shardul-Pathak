@@ -270,36 +270,6 @@ export default function TeacherHomeScreen() {
             ))
           )}
         </View>
-
-        {/* System Health */}
-        <View style={styles.sectionWrapper}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>System Health</Text>
-          <View style={[styles.healthCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <View style={styles.healthRow}>
-              <View style={styles.healthItem}>
-                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                <Text style={[styles.healthLabel, { color: theme.text }]}>PostgreSQL 5433</Text>
-              </View>
-              <Text style={[styles.healthStatus, { color: theme.accent }]}>Connected</Text>
-            </View>
-            <View style={[styles.healthDivider, { backgroundColor: theme.border }]} />
-            <View style={styles.healthRow}>
-              <View style={styles.healthItem}>
-                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                <Text style={[styles.healthLabel, { color: theme.text }]}>Spring Boot REST API</Text>
-              </View>
-              <Text style={[styles.healthStatus, { color: theme.accent }]}>Optimal</Text>
-            </View>
-            <View style={[styles.healthDivider, { backgroundColor: theme.border }]} />
-            <View style={styles.healthRow}>
-              <View style={styles.healthItem}>
-                <View style={[styles.statusDot, { backgroundColor: '#10B981' }]} />
-                <Text style={[styles.healthLabel, { color: theme.text }]}>JWT Security RBAC</Text>
-              </View>
-              <Text style={[styles.healthStatus, { color: theme.accent }]}>Active</Text>
-            </View>
-          </View>
-        </View>
       </ScrollView>
 
       {/* Award Points Modal Dialog */}
@@ -544,38 +514,5 @@ const styles = StyleSheet.create({
   logDate: {
     fontSize: 10,
     marginLeft: 8,
-  },
-  healthCard: {
-    padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  healthRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  healthItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  healthLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  healthStatus: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  healthDivider: {
-    height: 1,
-    marginVertical: 6,
   },
 });
